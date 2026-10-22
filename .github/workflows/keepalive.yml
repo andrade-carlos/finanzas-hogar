@@ -1,0 +1,19 @@
+# Evita que el proyecto gratuito de Supabase se pause por inactividad (se pausa tras 7 días sin uso).
+# Hace una consulta mínima cada 3 días. No lee ni modifica datos.
+name: Mantener activo Supabase
+on:
+  schedule:
+    - cron: '17 13 */3 * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Consulta mínima a Supabase
+        run: |
+          URL=$(jq -r .supabaseUrl config.json)
+          KEY=$(jq -r .supabaseKey config.json)
+          curl -sS --fail -X POST "$URL/rest/v1/rpc/ping" -H "apikey: $KEY" -H "Content-Type: application/json" -d '{}'
