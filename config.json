@@ -1,6 +1,6 @@
 {
-  "supabaseUrl": "https://TU-PROYECTO.supabase.co",
-  "supabaseKey": "PEGA_AQUI_TU_CLAVE_PUBLICABLE",
+  "supabaseUrl": "https://mqdxddovrqcdcksraung.supabase.co",
+  "supabaseKey": "sb_publishable_Wuf0TSowb9G54Pafpj2YRA_gqOsGzRm",
   "appName": "Finanzas del hogar",
   "allowSignup": true,
   "idleMinutes": 15
