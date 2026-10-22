@@ -1,0 +1,7 @@
+{
+  "supabaseUrl": "https://TU-PROYECTO.supabase.co",
+  "supabaseKey": "PEGA_AQUI_TU_CLAVE_PUBLICABLE",
+  "appName": "Finanzas del hogar",
+  "allowSignup": true,
+  "idleMinutes": 15
+}
