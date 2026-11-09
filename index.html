@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-jnTVrhdXeH0WtQcodhJ6tUkrXVF3ZuruEgoekzBAKy8=' 'sha256-tKJf9AqoVeciyRhEol3T8vwgBvq3Zx7LLWBOXwU9Ku8=' 'sha256-LQliFBaphYmmoUwuD3Bk4FNOt92m1Z43QrUdLPSEHns=' 'sha256-mi77sEKFNvL85Pk/3r8oTcwqca9u/rYmKkBe3F2Ad/U=' 'sha256-nINRiPPAd+l8I/yawpcpNwLnLi13rYRsIVtpQqZmp4w=' 'sha256-5dNx8jm/+YgajgSduK9c8a7JZe5UMk1eZns/d0YgV6c='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'self' https://*.supabase.co; worker-src blob:; form-action 'none'; base-uri 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-jnTVrhdXeH0WtQcodhJ6tUkrXVF3ZuruEgoekzBAKy8=' 'sha256-tKJf9AqoVeciyRhEol3T8vwgBvq3Zx7LLWBOXwU9Ku8=' 'sha256-LQliFBaphYmmoUwuD3Bk4FNOt92m1Z43QrUdLPSEHns=' 'sha256-mi77sEKFNvL85Pk/3r8oTcwqca9u/rYmKkBe3F2Ad/U=' 'sha256-i8Yqs+A7J0iHHzjqVRB1qhQmi1XgqVj1umjT6pmWCHE=' 'sha256-5dNx8jm/+YgajgSduK9c8a7JZe5UMk1eZns/d0YgV6c='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'self' https://*.supabase.co; worker-src blob:; form-action 'none'; base-uri 'none'; object-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex, nofollow, noarchive">
 <title>Libertad Financiera</title>
@@ -353,6 +353,10 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
 
   var RULES = [];
   function rule(test, fn) { RULES.push({ test: test, fn: fn }); }
+
+  // Recordatorios de vencimiento y estados de cuentas de ahorro/corriente: no son movimientos.
+  rule(function (c) { return /recordatorio|vence hoy|tu pago vence|fecha m[aá]xima (de|del) pago|pr[oó]ximo pago|no olvides pagar/i.test(c.subject + ' ' + c.flat.slice(0, 240)) && !/comprobante|transacci[oó]n:/i.test(c.flat.slice(0, 300)) && !c.pdfs.length && !/estado de cuenta/i.test(c.subject); }, function () { return ev('ignore', { reason: 'recordatorio' }); });
+  rule(function (c) { return /estado de cuenta/i.test(c.subject) && /CUENTA CORRIENTE|CUENTA DE AHORROS/i.test(c.flat.slice(0, 600)); }, function () { return ev('ignore', { reason: 'estado de cuenta bancaria: los movimientos ya llegan por aviso' }); });
 
   // ---------------- Produbanco ----------------
   function isP(c) { return /produbanco/.test(c.dom); }
@@ -4926,7 +4930,7 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
     var m = M(st), fp = meta.fp, person = meta.person, d = decision || {};
     var pend = function (reason, sug) { return { status: 'pending', reason: reason, sug: sug || {} }; };
     var ok = function (text) { return { status: 'ok', text: text }; };
-    if (d.action === 'ignorar') return ok('Ignorado: ' + summary(ev));
+    if (d.action === 'ignorar') return ok('Ignorado: ' + (ev.type === 'unknown' ? '"' + (meta.subject || 'correo') + '"' : summary(ev)) + (ev.amount ? ' (' + money(ev.amount) + ')' : ''));
     switch (ev.type) {
       case 'card_purchase': {
         var r = d.accountId ? { acc: App.accById(d.accountId), principal: false } : cardAccount(st, ev.institution, ev.card);
@@ -5058,7 +5062,7 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
     st.rules = (st.rules || []).filter(function (r) { return r.merchant !== mer; });
     st.rules.push({ merchant: mer, category: category, kind: 'consumo' });
   }
-  function summary(ev) { return (ev.merchant || ev.counterparty || ev.provider || ev.type) + ' ' + (ev.amount ? money(ev.amount) : ''); }
+  function summary(ev) { return ev.merchant || ev.counterparty || ev.provider || ev.fromName || 'movimiento'; }
   Mail.apply = apply;
 
   // Procesa un aviso ya descifrado. Devuelve true si quedó registrado (o pendiente) en el estado.
@@ -5128,7 +5132,8 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
         for (var j = 0; j < decoded.length; j++) {
           var x = decoded[j];
           if (x.it.kind === 'pdf') {
-            var att = (x.p.att || [])[0];
+            var att = (x.p.att || [])[0], pev = MP.parse({ from: x.p.from, subject: x.p.subject, date: x.p.date, body: x.p.body, attachments: att ? [att.name] : [] });
+            if (pev.type === 'ignore') { App.mutate(function (st) { log(M(st), (x.p.subject || 'Documento') + ': no se importa (' + (pev.reason || 'no aplica') + ').', { date: (x.p.date || '').slice(0, 10) }, { person: personOf(M(st), x.it.label) }, 'ignorado'); }, { noRender: true }); ack.push(x.it.id); continue; }
             if (!att || !App.importPdfBytes) { ack.push(x.it.id); continue; }
             var res = await App.importPdfBytes(att.name, unb64(att.b64), { auto: true, inboxId: x.it.id });
             stats.stmt++;
