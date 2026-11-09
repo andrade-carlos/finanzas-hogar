@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-jnTVrhdXeH0WtQcodhJ6tUkrXVF3ZuruEgoekzBAKy8=' 'sha256-tKJf9AqoVeciyRhEol3T8vwgBvq3Zx7LLWBOXwU9Ku8=' 'sha256-LQliFBaphYmmoUwuD3Bk4FNOt92m1Z43QrUdLPSEHns=' 'sha256-mi77sEKFNvL85Pk/3r8oTcwqca9u/rYmKkBe3F2Ad/U=' 'sha256-tZEM7Zz9rpHMA+5qqrA1kxmjUqFkeW0jdd+JE2yWgvo=' 'sha256-5dNx8jm/+YgajgSduK9c8a7JZe5UMk1eZns/d0YgV6c='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'self' https://*.supabase.co; worker-src blob:; form-action 'none'; base-uri 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-jnTVrhdXeH0WtQcodhJ6tUkrXVF3ZuruEgoekzBAKy8=' 'sha256-tKJf9AqoVeciyRhEol3T8vwgBvq3Zx7LLWBOXwU9Ku8=' 'sha256-LQliFBaphYmmoUwuD3Bk4FNOt92m1Z43QrUdLPSEHns=' 'sha256-mi77sEKFNvL85Pk/3r8oTcwqca9u/rYmKkBe3F2Ad/U=' 'sha256-B0DVu0fvwoUzDRUOZBXFxwF0+sD7PemWnrqIiNELrlo=' 'sha256-5dNx8jm/+YgajgSduK9c8a7JZe5UMk1eZns/d0YgV6c='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'self' https://*.supabase.co; worker-src blob:; form-action 'none'; base-uri 'none'; object-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex, nofollow, noarchive">
 <title>Libertad Financiera</title>
@@ -199,6 +199,19 @@ code.secret{display:block;word-break:break-all;font-size:.95rem;margin-top:6px;p
 .inviteCode{font:700 1.5rem/1.3 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:2px;margin:6px 0}
 .userChip{display:inline-flex;gap:8px;align-items:center;font-size:.85rem;color:var(--ink2)}
 @media (max-width:820px){.userChip span{display:none}}
+.setupCode{width:100%;font:12px/1.35 ui-monospace,Menlo,Consolas,monospace;word-break:break-all;margin:6px 0;padding:8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.row.wrap{flex-wrap:wrap}
+@media (max-width:640px){.topbar{flex-wrap:wrap;row-gap:6px}.topbar .saveSt{display:none}.userChip>span{display:none}.topbar .title{flex:1 1 40%;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
+.pendList{display:flex;flex-direction:column;gap:10px}
+.pendItem{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--panel);display:flex;flex-direction:column;gap:6px}
+.pendHead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.pendAmt{font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pendCtl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.pendCtl select{max-width:100%}
+.mailLog{max-height:380px;overflow:auto;border:1px solid var(--line);border-radius:10px}
+.mailLog>div{display:grid;grid-template-columns:150px 1fr;gap:10px;padding:7px 12px;border-bottom:1px solid var(--line2)}
+.mailLog>div.err{background:rgba(220,60,60,.08)}
+@media (max-width:640px){.mailLog>div{grid-template-columns:1fr;gap:2px}}
 
 </style>
 </head>
@@ -269,6 +282,212 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
 `);let e=await s.signMessage(new TextEncoder().encode(t),`utf8`);if(!e||!(e instanceof Uint8Array))throw Error(`@supabase/auth-js: Wallet signMessage() API returned an recognized value`);n=e}}try{let{data:r,error:i}=await J(this.fetch,`POST`,`${this.url}/token?grant_type=web3`,{headers:this.headers,body:Object.assign({chain:`solana`,message:t,signature:z(n)},e.options?.captchaToken?{gotrue_meta_security:{captcha_token:e.options?.captchaToken}}:null),xform:Y});if(i)throw i;if(!r||!r.session||!r.user){let e=new R;return this._returnResult({data:{user:null,session:null},error:e})}return r.session&&(await this._saveSession(r.session),await this._notifyAllSubscribers(`SIGNED_IN`,r.session)),this._returnResult({data:Object.assign({},r),error:i})}catch(e){if(P(e))return this._returnResult({data:{user:null,session:null},error:e});throw e}}async _exchangeCodeForSession(e,t){let n=t?.flowId!=null,r=n?zr(t?.flowId):B()?zr(Dr(window.location.href)[N]):null;n&&!r&&this._debug(`#_exchangeCodeForSession()`,`provided flowId is not a valid flow id`,t?.flowId);let{verifier:i,flowId:a}=n&&!r?{verifier:null,flowId:null}:await Gr(this.storage,this.storageKey,r),[o,s]=(i??``).split(`/`);try{if(!o&&this.flowType===`pkce`)throw new ir;let{data:t,error:n}=await J(this.fetch,`POST`,`${this.url}/token?grant_type=pkce`,{headers:this.headers,body:{auth_code:e,code_verifier:o},xform:Y});if(await G(this.storage,this.storageKey,a),n)throw n;if(!t||!t.session||!t.user){let e=new R;return this._returnResult({data:{user:null,session:null,redirectType:null},error:e})}return t.session&&(await this._saveSession(t.session),await this._notifyAllSubscribers(s===`recovery`?`PASSWORD_RECOVERY`:`SIGNED_IN`,t.session)),this._returnResult({data:Object.assign(Object.assign({},t),{redirectType:s??null}),error:n})}catch(e){if(await G(this.storage,this.storageKey,a),P(e))return this._returnResult({data:{user:null,session:null,redirectType:null},error:e});throw e}}async signInWithIdToken(e){try{let{options:t,provider:n,token:r,access_token:i,nonce:a}=e,{data:o,error:s}=await J(this.fetch,`POST`,`${this.url}/token?grant_type=id_token`,{headers:this.headers,body:{provider:n,id_token:r,access_token:i,nonce:a,gotrue_meta_security:{captcha_token:t?.captchaToken}},xform:Y});if(s)return this._returnResult({data:{user:null,session:null},error:s});if(!o||!o.session||!o.user){let e=new R;return this._returnResult({data:{user:null,session:null},error:e})}return o.session&&(await this._saveSession(o.session),await this._notifyAllSubscribers(`SIGNED_IN`,o.session)),this._returnResult({data:o,error:s})}catch(e){if(P(e))return this._returnResult({data:{user:null,session:null},error:e});throw e}}async signInWithOtp(e){let t=null;try{if(`email`in e){let{email:n,options:r}=e,i=null,a=null;this.flowType===`pkce`&&([i,a,t]=await this._getCodeChallengeAndMethod());let{error:o}=await J(this.fetch,`POST`,`${this.url}/otp`,{headers:this.headers,body:{email:n,data:r?.data??{},create_user:r?.shouldCreateUser??!0,gotrue_meta_security:{captcha_token:r?.captchaToken},code_challenge:i,code_challenge_method:a},redirectTo:this._maybeAppendFlowIdToRedirect(r?.emailRedirectTo,t)});return this._returnResult({data:{user:null,session:null},error:o})}if(`phone`in e){let{phone:t,options:n}=e,{data:r,error:i}=await J(this.fetch,`POST`,`${this.url}/otp`,{headers:this.headers,body:{phone:t,data:n?.data??{},create_user:n?.shouldCreateUser??!0,gotrue_meta_security:{captcha_token:n?.captchaToken},channel:n?.channel??`sms`}});return this._returnResult({data:{user:null,session:null,messageId:r?.message_id},error:i})}throw new er(`You must provide either an email or phone number.`)}catch(e){if(await G(this.storage,this.storageKey,t),P(e))return this._returnResult({data:{user:null,session:null},error:e});throw e}}async verifyOtp(e){try{let t,n;`options`in e&&(t=e.options?.redirectTo,n=e.options?.captchaToken);let{data:r,error:i}=await J(this.fetch,`POST`,`${this.url}/verify`,{headers:this.headers,body:Object.assign(Object.assign({},e),{gotrue_meta_security:{captcha_token:n}}),redirectTo:t,xform:Y});if(i)throw i;if(!r)throw Error(`An error occurred on token verification.`);let a=r.session,o=r.user;return a?.access_token&&(await this._saveSession(a),await this._notifyAllSubscribers(e.type==`recovery`?`PASSWORD_RECOVERY`:`SIGNED_IN`,a)),this._returnResult({data:{user:o,session:a},error:null})}catch(e){if(P(e))return this._returnResult({data:{user:null,session:null},error:e});throw e}}async signInWithSSO(e){let t=null;try{let n=null,r=null;this.flowType===`pkce`&&([n,r,t]=await this._getCodeChallengeAndMethod());let i=await J(this.fetch,`POST`,`${this.url}/sso`,{body:Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({},`providerId`in e?{provider_id:e.providerId}:null),`domain`in e?{domain:e.domain}:null),{redirect_to:this._maybeAppendFlowIdToRedirect(e.options?.redirectTo,t)}),e?.options?.captchaToken?{gotrue_meta_security:{captcha_token:e.options.captchaToken}}:null),{skip_http_redirect:!0,code_challenge:n,code_challenge_method:r}),headers:this.headers,xform:li});return i.data?.url&&B()&&!e.options?.skipBrowserRedirect&&window.location.assign(i.data.url),this._returnResult(i)}catch(e){if(await G(this.storage,this.storageKey,t),P(e))return this._returnResult({data:null,error:e});throw e}}async reauthenticate(){return await this.initializePromise,this.lock==null?await this._reauthenticate():await this._acquireLock(this.lockAcquireTimeout,async()=>await this._reauthenticate())}async _reauthenticate(){try{return await this._useSession(async e=>{let{data:{session:t},error:n}=e;if(n)throw n;if(!t)throw new L;let{error:r}=await J(this.fetch,`GET`,`${this.url}/reauthenticate`,{headers:this.headers,jwt:t.access_token});return this._returnResult({data:{user:null,session:null},error:r})})}catch(e){if(P(e))return this._returnResult({data:{user:null,session:null},error:e});throw e}}async resend(e){let t=null;try{let n=`${this.url}/resend`;if(`email`in e){let{email:r,type:i,options:a}=e,o=null,s=null;this.flowType===`pkce`&&([o,s,t]=await this._getCodeChallengeAndMethod());let{error:c}=await J(this.fetch,`POST`,n,{headers:this.headers,body:{email:r,type:i,gotrue_meta_security:{captcha_token:a?.captchaToken},code_challenge:o,code_challenge_method:s},redirectTo:this._maybeAppendFlowIdToRedirect(a?.emailRedirectTo,t)});return c&&await G(this.storage,this.storageKey,t),this._returnResult({data:{user:null,session:null},error:c})}else if(`phone`in e){let{phone:t,type:r,options:i}=e,{data:a,error:o}=await J(this.fetch,`POST`,n,{headers:this.headers,body:{phone:t,type:r,gotrue_meta_security:{captcha_token:i?.captchaToken}}});return this._returnResult({data:{user:null,session:null,messageId:a?.message_id},error:o})}throw new er(`You must provide either an email or phone number and a type`)}catch(e){if(await G(this.storage,this.storageKey,t),P(e))return this._returnResult({data:{user:null,session:null},error:e});throw e}}async getSession(){return await this.initializePromise,this.lock==null?await this._useSession(async e=>e):await this._acquireLock(this.lockAcquireTimeout,async()=>this._useSession(async e=>e))}async _acquireLock(e,t){this._debug(`#_acquireLock`,`begin`,e);try{if(this.lockAcquired){let e=this.pendingInLock.length?this.pendingInLock[this.pendingInLock.length-1]:Promise.resolve(),n=(async()=>(await e,await t()))();return this.pendingInLock.push((async()=>{try{await n}catch{}})()),n}return await this.lock(`lock:${this.storageKey}`,e,async()=>{this._debug(`#_acquireLock`,`lock acquired for storage key`,this.storageKey);try{this.lockAcquired=!0;let e=t();for(this.pendingInLock.push((async()=>{try{await e}catch{}})()),await e;this.pendingInLock.length;){let e=[...this.pendingInLock];await Promise.all(e),this.pendingInLock.splice(0,e.length)}return await e}finally{this._debug(`#_acquireLock`,`lock released for storage key`,this.storageKey),this.lockAcquired=!1}})}finally{this._debug(`#_acquireLock`,`end`)}}async _useSession(e){this._debug(`#_useSession`,`begin`);try{return await e(await this.__loadSession())}finally{this._debug(`#_useSession`,`end`)}}async __loadSession(){this._debug(`#__loadSession()`,`begin`),this.lock!=null&&!this.lockAcquired&&this._debug(`#__loadSession()`,`used outside of an acquired lock!`,Error().stack);try{let e=null,t=await U(this.storage,this.storageKey);if(this._debug(`#getSession()`,`session from storage`,t),t!==null&&(this._isValidSession(t)?e=t:(this._debug(`#getSession()`,`session from storage is not valid`),await this._removeSession())),!e)return{data:{session:null},error:null};let n=e.expires_at?e.expires_at*1e3-Date.now()<Gn:!1;if(this._debug(`#__loadSession()`,`session has${n?``:` not`} expired`,`expires_at`,e.expires_at),!n)return{data:{session:await this._hydrateSessionUser(e)},error:null};let{data:r,error:i}=await this._callRefreshToken(e.refresh_token);if(i){let e=await U(this.storage,this.storageKey);return e&&this._isValidSession(e)&&e.expires_at&&e.expires_at*1e3>Date.now()?this._returnResult({data:{session:await this._hydrateSessionUser(e)},error:null}):this._returnResult({data:{session:null},error:i})}return this._returnResult({data:{session:r},error:null})}finally{this._debug(`#__loadSession()`,`end`)}}async _hydrateSessionUser(e){if(this.userStorage){let t=await U(this.userStorage,this.storageKey+`-user`);e.user=t?.user?t.user:ti()}if(this.storage.isServer&&e.user&&!e.user.__isUserNotAvailableProxy){let t={value:this.suppressGetSessionWarning};e.user=ni(e.user,t),t.value&&(this.suppressGetSessionWarning=!0)}return e}async getUser(e){if(e)return await this._getUser(e);await this.initializePromise;let t;return t=this.lock==null?await this._getUser():await this._acquireLock(this.lockAcquireTimeout,async()=>await this._getUser()),t.data.user&&(this.suppressGetSessionWarning=!0),t}async _getUser(e){try{return e?await J(this.fetch,`GET`,`${this.url}/user`,{headers:this.headers,jwt:e,xform:X}):await this._useSession(async e=>{let{data:t,error:n}=e;if(n)throw n;return!t.session?.access_token&&!this.hasCustomAuthorizationHeader?{data:{user:null},error:new L}:await J(this.fetch,`GET`,`${this.url}/user`,{headers:this.headers,jwt:t.session?.access_token??void 0,xform:X})})}catch(e){if(P(e))return $n(e)&&await this._removeSession(),this._returnResult({data:{user:null},error:e});throw e}}async updateUser(e,t={}){return await this.initializePromise,this.lock==null?await this._updateUser(e,t):await this._acquireLock(this.lockAcquireTimeout,async()=>await this._updateUser(e,t))}async _updateUser(e,t={}){let n=null;try{return await this._useSession(async r=>{let{data:i,error:a}=r;if(a)throw a;if(!i.session)throw new L;let o=i.session,s=null,c=null;this.flowType===`pkce`&&e.email!=null&&([s,c,n]=await this._getCodeChallengeAndMethod());let{data:l,error:u}=await J(this.fetch,`PUT`,`${this.url}/user`,{headers:this.headers,redirectTo:this._maybeAppendFlowIdToRedirect(t?.emailRedirectTo,n),body:Object.assign(Object.assign({},e),{code_challenge:s,code_challenge_method:c}),jwt:o.access_token,xform:X});if(u)throw u;return o.user=l.user,await this._saveSession(o),await this._notifyAllSubscribers(`USER_UPDATED`,o),this._returnResult({data:{user:o.user},error:null})})}catch(e){if(await G(this.storage,this.storageKey,n),P(e))return this._returnResult({data:{user:null},error:e});throw e}}async setSession(e){return await this.initializePromise,this.lock==null?await this._setSession(e):await this._acquireLock(this.lockAcquireTimeout,async()=>await this._setSession(e))}async _setSession(e){try{if(!e.access_token||!e.refresh_token)throw new L;let t=Date.now()/1e3,n=t,r=!0,i=null,{payload:a}=jr(e.access_token);if(a.exp&&(n=a.exp,r=n<=t),r){let{data:t,error:n}=await this._callRefreshToken(e.refresh_token);if(n)return this._returnResult({data:{user:null,session:null},error:n});if(!t)return{data:{user:null,session:null},error:null};i=t}else{let{data:r,error:a}=await this._getUser(e.access_token);if(a)return this._returnResult({data:{user:null,session:null},error:a});i={access_token:e.access_token,refresh_token:e.refresh_token,user:r.user,token_type:`bearer`,expires_in:n-t,expires_at:n},await this._saveSession(i),await this._notifyAllSubscribers(`SIGNED_IN`,i)}return this._returnResult({data:{user:i.user,session:i},error:null})}catch(e){if(P(e))return this._returnResult({data:{session:null,user:null},error:e});throw e}}async refreshSession(e){return await this.initializePromise,this.lock==null?await this._refreshSession(e):await this._acquireLock(this.lockAcquireTimeout,async()=>await this._refreshSession(e))}async _refreshSession(e){try{return await this._useSession(async t=>{if(!e){let{data:n,error:r}=t;if(r)throw r;e=n.session??void 0}if(!e?.refresh_token)throw new L;let{data:n,error:r}=await this._callRefreshToken(e.refresh_token);return r?this._returnResult({data:{user:null,session:null},error:r}):n?this._returnResult({data:{user:n.user,session:n},error:null}):this._returnResult({data:{user:null,session:null},error:null})})}catch(e){if(P(e))return this._returnResult({data:{user:null,session:null},error:e});throw e}}async _getSessionFromURL(e,t){try{if(!B())throw new tr(`No browser detected.`);if(e.error||e.error_description||e.error_code)throw new tr(e.error_description||`Error in URL with unspecified error_description`,{error:e.error||`unspecified_error`,code:e.error_code||`unspecified_code`});switch(t){case`implicit`:if(this.flowType===`pkce`)throw new rr(`Not a valid PKCE flow url.`);break;case`pkce`:if(this.flowType===`implicit`)throw new tr(`Not a valid implicit grant flow url.`);break;default:}if(t===`pkce`){if(this._debug(`#_initialize()`,`begin`,`is PKCE flow`,!0),!e.code)throw new rr(`No code detected.`);let{data:t,error:n}=await this._exchangeCodeForSession(e.code,{flowId:e[N]});if(n)throw n;let r=new URL(window.location.href);return r.searchParams.delete(`code`),r.searchParams.delete(N),window.history.replaceState(window.history.state,``,r.toString()),{data:{session:t.session,redirectType:t.redirectType??null},error:null}}let{provider_token:n,provider_refresh_token:r,access_token:i,refresh_token:a,expires_in:o,expires_at:s,token_type:c}=e;if(!i||!o||!a||!c)throw new tr(`No session defined in URL`);let l=Math.round(Date.now()/1e3),u=parseInt(o),d=l+u;s&&(d=parseInt(s));let f=d-l;f*1e3<=M&&console.warn(`@supabase/gotrue-js: Session as retrieved from URL expires in ${f}s, should have been closer to ${u}s`);let p=d-u;l-p>=120?console.warn(`@supabase/gotrue-js: Session as retrieved from URL was issued over 120s ago, URL could be stale`,p,d,l):l-p<0&&console.warn(`@supabase/gotrue-js: Session as retrieved from URL was issued in the future? Check the device clock for skew`,p,d,l);let{data:m,error:h}=await this._getUser(i);if(h)throw h;let g={provider_token:n,provider_refresh_token:r,access_token:i,expires_in:u,expires_at:d,refresh_token:a,token_type:c,user:m.user};return window.location.hash=``,this._debug(`#_getSessionFromURL()`,`clearing window.location.hash`),this._returnResult({data:{session:g,redirectType:e.type},error:null})}catch(e){if(P(e))return this._returnResult({data:{session:null,redirectType:null},error:e});throw e}}_isImplicitGrantCallback(e){return typeof this.detectSessionInUrl==`function`?this.detectSessionInUrl(new URL(window.location.href),e):!!(e.access_token||e.error||e.error_description||e.error_code)}async _isPKCECallback(e){if(!e.code)return!1;let t=zr(e[N]);return t&&await U(this.storage,Vr(this.storageKey,t))?!0:!!await U(this.storage,`${this.storageKey}-code-verifier`)}async signOut(e={scope:`global`}){return await this.initializePromise,this.lock==null?await this._signOut(e):await this._acquireLock(this.lockAcquireTimeout,async()=>await this._signOut(e))}async _signOut({scope:e}={scope:`global`}){return await this._useSession(async t=>{let n=async()=>{await this._removeSession()},{data:r,error:i}=t;if(i&&!$n(i))return this._returnResult({error:i});let a=r.session?.access_token;if(a){let{error:t}=await this.admin.signOut(a,e);if(t&&!(Qn(t)&&(t.status===404||t.status===401||t.status===403)||$n(t)))return e!==`others`&&await n(),this._returnResult({error:t})}return e!==`others`&&await n(),this._returnResult({error:null})})}onAuthStateChange(e){let t=Tr(),n={id:t,callback:e,unsubscribe:()=>{this._debug(`#unsubscribe()`,`state change callback with id removed`,t),this.stateChangeEmitters.delete(t)}};return this._debug(`#onAuthStateChange()`,`registered callback with id`,t),this.stateChangeEmitters.set(t,n),(async()=>{await this.initializePromise,this.lock==null?await this._emitInitialSession(t):await this._acquireLock(this.lockAcquireTimeout,async()=>{this._emitInitialSession(t)})})(),{data:{subscription:n}}}async _emitInitialSession(e){return await this._useSession(async t=>{try{let{data:{session:n},error:r}=t;if(r)throw r;await this.stateChangeEmitters.get(e)?.callback(`INITIAL_SESSION`,n),this._debug(`INITIAL_SESSION`,`callback id`,e,`session`,n)}catch(t){if(await this.stateChangeEmitters.get(e)?.callback(`INITIAL_SESSION`,null),this._debug(`INITIAL_SESSION`,`callback id`,e,`error`,t),lr(t))return;$n(t)||sr(t)||Qn(t)&&(t.code===`refresh_token_not_found`||t.code===`refresh_token_already_used`||t.code===`session_expired`)?console.warn(t):console.error(t)}})}async resetPasswordForEmail(e,t={}){let n=null,r=null,i=null;this.flowType===`pkce`&&([n,r,i]=await this._getCodeChallengeAndMethod(!0));try{return await J(this.fetch,`POST`,`${this.url}/recover`,{body:{email:e,code_challenge:n,code_challenge_method:r,gotrue_meta_security:{captcha_token:t.captchaToken}},headers:this.headers,redirectTo:this._maybeAppendFlowIdToRedirect(t.redirectTo,i)})}catch(e){if(await G(this.storage,this.storageKey,i),P(e))return this._returnResult({data:null,error:e});throw e}}async getUserIdentities(){try{let{data:e,error:t}=await this.getUser();if(t)throw t;return this._returnResult({data:{identities:e.user.identities??[]},error:null})}catch(e){if(P(e))return this._returnResult({data:null,error:e});throw e}}async linkIdentity(e){return`token`in e?this.linkIdentityIdToken(e):this.linkIdentityOAuth(e)}async linkIdentityOAuth(e){let t=null;try{let{data:n,error:r}=await this._useSession(async n=>{let{data:r,error:i}=n;if(i)throw i;let{url:a,flowId:o}=await this._getUrlForProvider(`${this.url}/user/identities/authorize`,e.provider,{redirectTo:e.options?.redirectTo,scopes:e.options?.scopes,queryParams:e.options?.queryParams,skipBrowserRedirect:!0});return t=o,await J(this.fetch,`GET`,a,{headers:this.headers,jwt:r.session?.access_token??void 0})});if(r)throw r;return B()&&!e.options?.skipBrowserRedirect&&window.location.assign(n?.url),this._returnResult({data:{provider:e.provider,url:n?.url,flowId:t},error:null})}catch(n){if(P(n))return this._returnResult({data:{provider:e.provider,url:null,flowId:t},error:n});throw n}}async linkIdentityIdToken(e){return await this._useSession(async t=>{try{let{error:n,data:{session:r}}=t;if(n)throw n;let{options:i,provider:a,token:o,access_token:s,nonce:c}=e,{data:l,error:u}=await J(this.fetch,`POST`,`${this.url}/token?grant_type=id_token`,{headers:this.headers,jwt:r?.access_token??void 0,body:{provider:a,id_token:o,access_token:s,nonce:c,link_identity:!0,gotrue_meta_security:{captcha_token:i?.captchaToken}},xform:Y});return u?this._returnResult({data:{user:null,session:null},error:u}):!l||!l.session||!l.user?this._returnResult({data:{user:null,session:null},error:new R}):(l.session&&(await this._saveSession(l.session),await this._notifyAllSubscribers(`USER_UPDATED`,l.session)),this._returnResult({data:l,error:u}))}catch(e){if(await G(this.storage,this.storageKey,null),P(e))return this._returnResult({data:{user:null,session:null},error:e});throw e}})}async unlinkIdentity(e){try{return await this._useSession(async t=>{let{data:n,error:r}=t;if(r)throw r;return await J(this.fetch,`DELETE`,`${this.url}/user/identities/${e.identity_id}`,{headers:this.headers,jwt:n.session?.access_token??void 0})})}catch(e){if(P(e))return this._returnResult({data:null,error:e});throw e}}async _refreshAccessToken(e){let t=`#_refreshAccessToken()`;this._debug(t,`begin`);try{let n=Date.now();return await Nr(async n=>(n>0&&await Mr(200*2**(n-1)),this._debug(t,`refreshing attempt`,n),await J(this.fetch,`POST`,`${this.url}/token?grant_type=refresh_token`,{body:{refresh_token:e},headers:this.headers,xform:Y})),(e,t)=>{let r=200*2**e;return t&&sr(t)&&Date.now()+r-n<M})}catch(e){if(this._debug(t,`error`,e),P(e))return this._returnResult({data:{session:null,user:null},error:e});throw e}finally{this._debug(t,`end`)}}_isValidSession(e){return typeof e==`object`&&!!e&&`access_token`in e&&`refresh_token`in e&&`expires_at`in e}async _handleProviderSignIn(e,t){let{url:n,flowId:r}=await this._getUrlForProvider(`${this.url}/authorize`,e,{redirectTo:t.redirectTo,scopes:t.scopes,queryParams:t.queryParams});return this._debug(`#_handleProviderSignIn()`,`provider`,e,`options`,t,`url`,n),B()&&!t.skipBrowserRedirect&&window.location.assign(n),{data:{provider:e,url:n,flowId:r},error:null}}async _recoverAndRefresh(){let e=`#_recoverAndRefresh()`;this._debug(e,`begin`);try{let t=await U(this.storage,this.storageKey);if(t&&this.userStorage){let e=await U(this.userStorage,this.storageKey+`-user`);!this.storage.isServer&&Object.is(this.storage,this.userStorage)&&!e&&(e={user:t.user},await H(this.userStorage,this.storageKey+`-user`,e)),t.user=e?.user??ti()}else if(t&&!t.user&&!t.user){let e=await U(this.storage,this.storageKey+`-user`);e&&e?.user?(t.user=e.user,await W(this.storage,this.storageKey+`-user`),await H(this.storage,this.storageKey,t)):t.user=ti()}if(this._debug(e,`session from storage`,t),!this._isValidSession(t)){this._debug(e,`session is not valid`),t!==null&&await this._removeSession();return}let n=(t.expires_at??1/0)*1e3-Date.now()<Gn;if(this._debug(e,`session has${n?``:` not`} expired with margin of ${Gn}s`),n){if(this.autoRefreshToken&&t.refresh_token){let{error:n}=await this._callRefreshToken(t.refresh_token);n&&(lr(n)?this._debug(e,`refresh discarded by commit guard`,n):this._debug(e,`refresh failed`,n))}}else if(t.user&&t.user.__isUserNotAvailableProxy===!0)try{let{data:n,error:r}=await this._getUser(t.access_token);!r&&n?.user?(t.user=n.user,await this._saveSession(t),await this._notifyAllSubscribers(`SIGNED_IN`,t)):this._debug(e,`could not get user data, skipping SIGNED_IN notification`)}catch(t){console.error(`Error getting user data:`,t),this._debug(e,`error getting user data, skipping SIGNED_IN notification`,t)}else await this._notifyAllSubscribers(`SIGNED_IN`,t)}catch(t){this._debug(e,`error`,t),sr(t)?console.warn(t):console.error(t);return}finally{this._debug(e,`end`)}}async _callRefreshToken(e){var t,n;if(!e)throw new L;if(this.refreshingDeferred)return this.refreshingDeferred.promise;if(this.lastRefreshFailure&&this.lastRefreshFailure.refreshToken===e&&Date.now()<this.lastRefreshFailure.expiresAt)return this._debug(`#_callRefreshToken()`,`returning cached failure (cooldown active)`),this.lastRefreshFailure.result;let r=`#_callRefreshToken()`;this._debug(r,`begin`);try{this.refreshingDeferred=new Ar,this.refreshingDeferred.promise.then(void 0,()=>{});let t=await U(this.storage,this.storageKey),{data:n,error:i}=await this._refreshAccessToken(e);if(i)throw i;if(!n.session)throw new L;let a=await U(this.storage,this.storageKey);if(t!==null&&(a===null||a.refresh_token!==t.refresh_token)){this._debug(r,`commit guard: storage changed since refresh started, discarding rotated tokens`,{startedWith:`present`,nowHolds:a?`replaced`:`cleared`});let e={data:null,error:new cr};return this.refreshingDeferred.resolve(e),e}let o=this._sessionRemovalEpoch;if(await this._saveSession(n.session),this._sessionRemovalEpoch!==o){this._debug(r,`commit guard (post-save): _removeSession ran during _saveSession, undoing write`),await W(this.storage,this.storageKey),this.userStorage&&await W(this.userStorage,this.storageKey+`-user`);let e={data:null,error:new cr};return this.refreshingDeferred.resolve(e),e}await this._notifyAllSubscribers(`TOKEN_REFRESHED`,n.session);let s={data:n.session,error:null};return this.lastRefreshFailure=null,this.refreshingDeferred.resolve(s),s}catch(i){if(this._debug(r,`error`,i),P(i)){let n={data:null,error:i};if(!sr(i)){let e=await U(this.storage,this.storageKey);e?.expires_at&&e.expires_at*1e3>Date.now()?this._debug(r,`proactive refresh failed, access token still valid — preserving session`):await this._removeSession()}return this.lastRefreshFailure={refreshToken:e,result:n,expiresAt:Date.now()+6e4},(t=this.refreshingDeferred)==null||t.resolve(n),n}throw(n=this.refreshingDeferred)==null||n.reject(i),i}finally{this.refreshingDeferred=null,this._debug(r,`end`)}}async _notifyAllSubscribers(e,t,n=!0){if(this._pendingInitNotifications!==null&&n){this._pendingInitNotifications.push({event:e,session:t,broadcast:n});return}let r=`#_notifyAllSubscribers(${e})`;this._debug(r,`begin`,t,`broadcast = ${n}`);try{this.broadcastChannel&&n&&this.broadcastChannel.postMessage({event:e,session:t});let r=[],i=Array.from(this.stateChangeEmitters.values()).map(async n=>{try{await n.callback(e,t)}catch(e){r.push(e)}});if(await Promise.all(i),r.length>0){for(let e=0;e<r.length;e+=1)console.error(r[e]);throw r[0]}}finally{this._debug(r,`end`)}}async _saveSession(e){this._debug(`#_saveSession()`,e),this.suppressGetSessionWarning=!0;let t=Object.assign({},e),n=t.user&&t.user.__isUserNotAvailableProxy===!0;if(this.userStorage){!n&&t.user&&await H(this.userStorage,this.storageKey+`-user`,{user:t.user});let e=Object.assign({},t);delete e.user;let r=ri(e);await H(this.storage,this.storageKey,r)}else{let e=ri(t);await H(this.storage,this.storageKey,e)}}async _removeSession(){this._sessionRemovalEpoch+=1,this._debug(`#_removeSession()`),this.lastRefreshFailure=null,this.suppressGetSessionWarning=!1,await W(this.storage,this.storageKey),await Kr(this.storage,this.storageKey),await W(this.storage,this.storageKey+`-user`),this.userStorage&&await W(this.userStorage,this.storageKey+`-user`),await this._notifyAllSubscribers(`SIGNED_OUT`,null)}_removeVisibilityChangedCallback(){this._debug(`#_removeVisibilityChangedCallback()`);let e=this.visibilityChangedCallback;this.visibilityChangedCallback=null;try{e&&B()&&window!=null&&window.removeEventListener&&window.removeEventListener(`visibilitychange`,e)}catch(e){console.error(`removing visibilitychange callback failed`,e)}}async _startAutoRefresh(){await this._stopAutoRefresh(),this._debug(`#_startAutoRefresh()`);let e=setInterval(()=>this._autoRefreshTokenTick(),M);this.autoRefreshTicker=e,e&&typeof e==`object`&&typeof e.unref==`function`?e.unref():typeof Deno<`u`&&typeof Deno.unrefTimer==`function`&&Deno.unrefTimer(e);let t=setTimeout(async()=>{await this.initializePromise,await this._autoRefreshTokenTick()},0);this.autoRefreshTickTimeout=t,t&&typeof t==`object`&&typeof t.unref==`function`?t.unref():typeof Deno<`u`&&typeof Deno.unrefTimer==`function`&&Deno.unrefTimer(t)}async _stopAutoRefresh(){this._debug(`#_stopAutoRefresh()`);let e=this.autoRefreshTicker;this.autoRefreshTicker=null,e&&clearInterval(e);let t=this.autoRefreshTickTimeout;this.autoRefreshTickTimeout=null,t&&clearTimeout(t)}async startAutoRefresh(){this._removeVisibilityChangedCallback(),await this._startAutoRefresh()}async stopAutoRefresh(){this._removeVisibilityChangedCallback(),await this._stopAutoRefresh()}async dispose(){var e;this._removeVisibilityChangedCallback(),await this._stopAutoRefresh(),(e=this.broadcastChannel)==null||e.close(),this.broadcastChannel=null,this.stateChangeEmitters.clear()}async _autoRefreshTokenTick(){if(this._debug(`#_autoRefreshTokenTick()`,`begin`),this.lock!=null){try{await this._acquireLock(0,async()=>{try{let e=Date.now();try{return await this._useSession(async t=>{let{data:{session:n}}=t;if(!n||!n.refresh_token||!n.expires_at){this._debug(`#_autoRefreshTokenTick()`,`no session`);return}let r=Math.floor((n.expires_at*1e3-e)/M);this._debug(`#_autoRefreshTokenTick()`,`access token expires in ${r} ticks, a tick lasts ${M}ms, refresh threshold is 3 ticks`),r<=3&&await this._callRefreshToken(n.refresh_token)})}catch(e){console.error(`Auto refresh tick failed with error. This is likely a transient error.`,e)}}finally{this._debug(`#_autoRefreshTokenTick()`,`end`)}})}catch(e){if(e instanceof gi)this._debug(`auto refresh token tick lock not available`);else throw e}return}if(this.refreshingDeferred!==null){this._debug(`#_autoRefreshTokenTick()`,`refresh already in flight, skipping`);return}try{let e=Date.now();try{await this._useSession(async t=>{let{data:{session:n}}=t;if(!n||!n.refresh_token||!n.expires_at){this._debug(`#_autoRefreshTokenTick()`,`no session`);return}let r=Math.floor((n.expires_at*1e3-e)/M);this._debug(`#_autoRefreshTokenTick()`,`access token expires in ${r} ticks, a tick lasts ${M}ms, refresh threshold is 3 ticks`),r<=3&&await this._callRefreshToken(n.refresh_token)})}catch(e){console.error(`Auto refresh tick failed with error. This is likely a transient error.`,e)}}finally{this._debug(`#_autoRefreshTokenTick()`,`end`)}}async _handleVisibilityChange(){if(this._debug(`#_handleVisibilityChange()`),!B()||!(window!=null&&window.addEventListener))return this.autoRefreshToken&&this.startAutoRefresh(),!1;try{this.visibilityChangedCallback=async()=>{try{await this._onVisibilityChanged(!1)}catch(e){this._debug(`#visibilityChangedCallback`,`error`,e)}},window==null||window.addEventListener(`visibilitychange`,this.visibilityChangedCallback),await this._onVisibilityChanged(!0)}catch(e){console.error(`_handleVisibilityChange`,e)}}async _onVisibilityChanged(e){let t=`#_onVisibilityChanged(${e})`;if(this._debug(t,`visibilityState`,document.visibilityState),document.visibilityState===`visible`){if(this.autoRefreshToken&&this._startAutoRefresh(),!e)if(await this.initializePromise,this.lock!=null)await this._acquireLock(this.lockAcquireTimeout,async()=>{if(document.visibilityState!==`visible`){this._debug(t,`acquired the lock to recover the session, but the browser visibilityState is no longer visible, aborting`);return}await this._recoverAndRefresh()});else{if(document.visibilityState!==`visible`){this._debug(t,`visibilityState is no longer visible, skipping recovery`);return}await this._recoverAndRefresh()}}else document.visibilityState===`hidden`&&this.autoRefreshToken&&this._stopAutoRefresh()}async _getUrlForProvider(e,t,n){let r=n?.redirectTo,i=null,a=null,o=null;this.flowType===`pkce`&&([i,a,o]=await this._getCodeChallengeAndMethod(),r=this._maybeAppendFlowIdToRedirect(r,o));let s=[`provider=${encodeURIComponent(t)}`];if(r&&s.push(`redirect_to=${encodeURIComponent(r)}`),n?.scopes&&s.push(`scopes=${encodeURIComponent(n.scopes)}`),i!=null&&a!=null){let e=new URLSearchParams({code_challenge:`${encodeURIComponent(i)}`,code_challenge_method:`${encodeURIComponent(a)}`});s.push(e.toString())}if(n?.queryParams){let e=new URLSearchParams(n.queryParams);s.push(e.toString())}return n?.skipBrowserRedirect&&s.push(`skip_http_redirect=${n.skipBrowserRedirect}`),{url:`${e}?${s.join(`&`)}`,flowId:o}}_maybeAppendFlowIdToRedirect(e,t){return!e||!t||!this.experimental.appendPkceFlowIdToRedirects?e??void 0:qr(e,t)}async _getCodeChallengeAndMethod(e=!1){return Jr(this.storage,this.storageKey,e,e=>this._debug(`#_getCodeChallengeAndMethod()`,`evicted oldest pending PKCE verifier slot`,e))}async _unenroll(e){try{return await this._useSession(async t=>{let{data:n,error:r}=t;return r?this._returnResult({data:null,error:r}):await J(this.fetch,`DELETE`,`${this.url}/factors/${e.factorId}`,{headers:this.headers,jwt:n?.session?.access_token})})}catch(e){if(P(e))return this._returnResult({data:null,error:e});throw e}}async _enroll(e){try{return await this._useSession(async t=>{let{data:n,error:r}=t;if(r)return this._returnResult({data:null,error:r});let i=Object.assign({friendly_name:e.friendlyName,factor_type:e.factorType},e.factorType===`phone`?{phone:e.phone}:e.factorType===`totp`?{issuer:e.issuer}:{}),{data:a,error:o}=await J(this.fetch,`POST`,`${this.url}/factors`,{body:i,headers:this.headers,jwt:n?.session?.access_token});return o?this._returnResult({data:null,error:o}):(e.factorType===`totp`&&a.type===`totp`&&a?.totp?.qr_code&&(a.totp.qr_code=`data:image/svg+xml;utf-8,${a.totp.qr_code}`),this._returnResult({data:a,error:null}))})}catch(e){if(P(e))return this._returnResult({data:null,error:e});throw e}}async _verify(e){let t=async()=>{try{return await this._useSession(async t=>{let{data:n,error:r}=t;if(r)return this._returnResult({data:null,error:r});let i=Object.assign({challenge_id:e.challengeId},`webauthn`in e?{webauthn:Object.assign(Object.assign({},e.webauthn),{credential_response:e.webauthn.type===`create`?Ni(e.webauthn.credential_response):Pi(e.webauthn.credential_response)})}:{code:e.code}),{data:a,error:o}=await J(this.fetch,`POST`,`${this.url}/factors/${e.factorId}/verify`,{body:i,headers:this.headers,jwt:n?.session?.access_token});return o?this._returnResult({data:null,error:o}):(await this._saveSession(Object.assign({expires_at:Math.round(Date.now()/1e3)+a.expires_in},a)),await this._notifyAllSubscribers(`MFA_CHALLENGE_VERIFIED`,a),this._returnResult({data:a,error:o}))})}catch(e){if(P(e))return this._returnResult({data:null,error:e});throw e}};return this.lock==null?t():this._acquireLock(this.lockAcquireTimeout,t)}async _challenge(e){let t=async()=>{try{return await this._useSession(async t=>{let{data:n,error:r}=t;if(r)return this._returnResult({data:null,error:r});let i=await J(this.fetch,`POST`,`${this.url}/factors/${e.factorId}/challenge`,{body:e,headers:this.headers,jwt:n?.session?.access_token});if(i.error)return i;let{data:a}=i;if(a.type!==`webauthn`)return{data:a,error:null};switch(a.webauthn.type){case`create`:return{data:Object.assign(Object.assign({},a),{webauthn:Object.assign(Object.assign({},a.webauthn),{credential_options:Object.assign(Object.assign({},a.webauthn.credential_options),{publicKey:ji(a.webauthn.credential_options.publicKey)})})}),error:null};case`request`:return{data:Object.assign(Object.assign({},a),{webauthn:Object.assign(Object.assign({},a.webauthn),{credential_options:Object.assign(Object.assign({},a.webauthn.credential_options),{publicKey:Mi(a.webauthn.credential_options.publicKey)})})}),error:null}}})}catch(e){if(P(e))return this._returnResult({data:null,error:e});throw e}};return this.lock==null?t():this._acquireLock(this.lockAcquireTimeout,t)}async _challengeAndVerify(e){let{data:t,error:n}=await this._challenge({factorId:e.factorId});return n?this._returnResult({data:null,error:n}):await this._verify({factorId:e.factorId,challengeId:t.id,code:e.code})}async _listFactors(){let{data:{user:e},error:t}=await this.getUser();if(t)return{data:null,error:t};let n={all:[],phone:[],totp:[],webauthn:[],recovery_code:[]};for(let t of e?.factors??[])n.all.push(t),t.status===`verified`&&t.factor_type in n&&Array.isArray(n[t.factor_type])&&n[t.factor_type].push(t);return{data:n,error:null}}async _getAuthenticatorAssuranceLevel(e){if(e)try{let{payload:t}=jr(e),n=null;t.aal&&(n=t.aal);let r=n,{data:{user:i},error:a}=await this.getUser(e);if(a)return this._returnResult({data:null,error:a});((i?.factors)?.filter(e=>e.status===`verified`)??[]).length>0&&(r=`aal2`);let o=t.amr||[];return{data:{currentLevel:n,nextLevel:r,currentAuthenticationMethods:o},error:null}}catch(e){if(P(e))return this._returnResult({data:null,error:e});throw e}let{data:{session:t},error:n}=await this.getSession();if(n)return this._returnResult({data:null,error:n});if(!t)return{data:{currentLevel:null,nextLevel:null,currentAuthenticationMethods:[]},error:null};let{payload:r}=jr(t.access_token),i=null;r.aal&&(i=r.aal);let a=i;(t.user.factors?.filter(e=>e.status===`verified`)??[]).length>0&&(a=`aal2`);let o=r.amr||[];return{data:{currentLevel:i,nextLevel:a,currentAuthenticationMethods:o},error:null}}async _getRecoveryCodesStatus(){ei(this.experimental);try{return await this._useSession(async e=>{let{data:t,error:n}=e;if(n)return this._returnResult({data:null,error:n});let{data:r,error:i}=await J(this.fetch,`GET`,`${this.url}/factors/recovery-codes`,{headers:this.headers,jwt:t?.session?.access_token});return i?this._returnResult({data:null,error:i}):this._returnResult({data:r,error:null})})}catch(e){if(P(e))return this._returnResult({data:null,error:e});throw e}}async _generateRecoveryCodes(e){ei(this.experimental);try{return await this._useSession(async t=>{let{data:n,error:r}=t;if(r)return this._returnResult({data:null,error:r});let{data:i,error:a}=await J(this.fetch,`POST`,`${this.url}/factors/recovery-codes`,{body:e?.friendlyName?{friendly_name:e.friendlyName}:void 0,headers:this.headers,jwt:n?.session?.access_token});return a?this._returnResult({data:null,error:a}):this._returnResult({data:i,error:null})})}catch(e){if(P(e))return this._returnResult({data:null,error:e});throw e}}async _verifyRecoveryCode(e){ei(this.experimental);let t=async()=>{try{return await this._useSession(async t=>{let{data:n,error:r}=t;if(r)return this._returnResult({data:null,error:r});let{data:i,error:a}=await J(this.fetch,`POST`,`${this.url}/factors/recovery-codes/verify`,{body:{code:e.code},headers:this.headers,jwt:n?.session?.access_token});if(a)return this._returnResult({data:null,error:a});let o=Object.assign({expires_at:wr(i.expires_in)},i);return await this._saveSession(o),await this._notifyAllSubscribers(`MFA_CHALLENGE_VERIFIED`,o),this._returnResult({data:i,error:null})})}catch(e){if(P(e))return this._returnResult({data:null,error:e});throw e}};return this.lock==null?t():this._acquireLock(this.lockAcquireTimeout,t)}async _regenerateRecoveryCodes(){ei(this.experimental);try{return await this._useSession(async e=>{let{data:t,error:n}=e;if(n)return this._returnResult({data:null,error:n});let{data:r,error:i}=await J(this.fetch,`POST`,`${this.url}/factors/recovery-codes/regenerate`,{headers:this.headers,jwt:t?.session?.access_token});return i?this._returnResult({data:null,error:i}):this._returnResult({data:r,error:null})})}catch(e){if(P(e))return this._returnResult({data:null,error:e});throw e}}async _unenrollRecoveryCodes(){ei(this.experimental);try{return await this._useSession(async e=>{let{data:t,error:n}=e;if(n)return this._returnResult({data:null,error:n});let{data:r,error:i}=await J(this.fetch,`DELETE`,`${this.url}/factors/recovery-codes`,{headers:this.headers,jwt:t?.session?.access_token});return i?this._returnResult({data:null,error:i}):this._returnResult({data:r,error:null})})}catch(e){if(P(e))return this._returnResult({data:null,error:e});throw e}}async _getAuthorizationDetails(e){try{return await this._useSession(async t=>{let{data:{session:n},error:r}=t;return r?this._returnResult({data:null,error:r}):n?await J(this.fetch,`GET`,`${this.url}/oauth/authorizations/${e}`,{headers:this.headers,jwt:n.access_token,xform:e=>({data:e,error:null})}):this._returnResult({data:null,error:new L})})}catch(e){if(P(e))return this._returnResult({data:null,error:e});throw e}}async _approveAuthorization(e,t){try{return await this._useSession(async n=>{let{data:{session:r},error:i}=n;if(i)return this._returnResult({data:null,error:i});if(!r)return this._returnResult({data:null,error:new L});let a=await J(this.fetch,`POST`,`${this.url}/oauth/authorizations/${e}/consent`,{headers:this.headers,jwt:r.access_token,body:{action:`approve`},xform:e=>({data:e,error:null})});return a.data&&a.data.redirect_url&&B()&&!t?.skipBrowserRedirect&&window.location.assign(a.data.redirect_url),a})}catch(e){if(P(e))return this._returnResult({data:null,error:e});throw e}}async _denyAuthorization(e,t){try{return await this._useSession(async n=>{let{data:{session:r},error:i}=n;if(i)return this._returnResult({data:null,error:i});if(!r)return this._returnResult({data:null,error:new L});let a=await J(this.fetch,`POST`,`${this.url}/oauth/authorizations/${e}/consent`,{headers:this.headers,jwt:r.access_token,body:{action:`deny`},xform:e=>({data:e,error:null})});return a.data&&a.data.redirect_url&&B()&&!t?.skipBrowserRedirect&&window.location.assign(a.data.redirect_url),a})}catch(e){if(P(e))return this._returnResult({data:null,error:e});throw e}}async _listOAuthGrants(){try{return await this._useSession(async e=>{let{data:{session:t},error:n}=e;return n?this._returnResult({data:null,error:n}):t?await J(this.fetch,`GET`,`${this.url}/user/oauth/grants`,{headers:this.headers,jwt:t.access_token,xform:e=>({data:e,error:null})}):this._returnResult({data:null,error:new L})})}catch(e){if(P(e))return this._returnResult({data:null,error:e});throw e}}async _revokeOAuthGrant(e){try{return await this._useSession(async t=>{let{data:{session:n},error:r}=t;return r?this._returnResult({data:null,error:r}):n?(await J(this.fetch,`DELETE`,`${this.url}/user/oauth/grants`,{headers:this.headers,jwt:n.access_token,query:{client_id:e.clientId},noResolveJson:!0}),{data:{},error:null}):this._returnResult({data:null,error:new L})})}catch(e){if(P(e))return this._returnResult({data:null,error:e});throw e}}async fetchJwk(e,t={keys:[]}){let n=t.keys.find(t=>t.kid===e);if(n)return n;let r=Date.now();if(n=this.jwks.keys.find(t=>t.kid===e),n&&this.jwks_cached_at+6e5>r)return n;let{data:i,error:a}=await J(this.fetch,`GET`,`${this.url}/.well-known/jwks.json`,{headers:this.headers});if(a)throw a;return!i.keys||i.keys.length===0||(this.jwks=i,this.jwks_cached_at=r,n=i.keys.find(t=>t.kid===e),!n)?null:n}async getClaims(e,t={}){try{let n=e;if(!n){let{data:e,error:t}=await this.getSession();if(t||!e.session)return this._returnResult({data:null,error:t});n=e.session.access_token}let{header:r,payload:i,signature:a,raw:{header:o,payload:s}}=jr(n);if(!t?.allowExpired)try{Zr(i.exp)}catch(e){throw new fr(e instanceof Error?e.message:`JWT validation failed`)}let c=!r.alg||r.alg.startsWith(`HS`)||!r.kid||!(`crypto`in globalThis&&`subtle`in globalThis.crypto)?null:await this.fetchJwk(r.kid,t?.keys?{keys:t.keys}:t?.jwks);if(!c){let{error:e}=await this.getUser(n);if(e)throw e;return{data:{claims:i,header:r,signature:a},error:null}}let l=Qr(r.alg),u=await crypto.subtle.importKey(`jwk`,c,l,!0,[`verify`]);if(!await crypto.subtle.verify(l,u,a,Cr(`${o}.${s}`)))throw new fr(`Invalid JWT signature`);return{data:{claims:i,header:r,signature:a},error:null}}catch(e){if(P(e))return this._returnResult({data:null,error:e});throw e}}async signInWithPasskey(e){try{if(!Ii())return this._returnResult({data:null,error:new F(`Browser does not support WebAuthn`,null)});let{data:t,error:n}=await this._startPasskeyAuthentication({options:{captchaToken:e?.options?.captchaToken}});if(n||!t)return this._returnResult({data:null,error:n});let{data:r,error:i}=await Ri({publicKey:Mi(t.options),signal:e?.options?.signal??Ai.createNewAbortSignal(),mediation:e?.options?.mediation});if(i||!r)return this._returnResult({data:null,error:i??new F(`WebAuthn ceremony failed`,null)});let a=Pi(r);return this._verifyPasskeyAuthentication({challengeId:t.challenge_id,credential:a})}catch(e){if(P(e))return this._returnResult({data:null,error:e});throw e}}async registerPasskey(e){try{if(!Ii())return this._returnResult({data:null,error:new F(`Browser does not support WebAuthn`,null)});let{data:t,error:n}=await this._startPasskeyRegistration();if(n||!t)return this._returnResult({data:null,error:n});let{data:r,error:i}=await Li({publicKey:ji(t.options),signal:e?.options?.signal??Ai.createNewAbortSignal()});if(i||!r)return this._returnResult({data:null,error:i??new F(`WebAuthn ceremony failed`,null)});let a=Ni(r);return this._verifyPasskeyRegistration({challengeId:t.challenge_id,credential:a})}catch(e){if(P(e))return this._returnResult({data:null,error:e});throw e}}async _startPasskeyRegistration(){try{return await this._useSession(async e=>{let{data:{session:t},error:n}=e;if(n)return this._returnResult({data:null,error:n});if(!t)return this._returnResult({data:null,error:new L});let{data:r,error:i}=await J(this.fetch,`POST`,`${this.url}/passkeys/registration/options`,{headers:this.headers,jwt:t.access_token,body:{}});return i?this._returnResult({data:null,error:i}):this._returnResult({data:r,error:null})})}catch(e){if(P(e))return this._returnResult({data:null,error:e});throw e}}async _verifyPasskeyRegistration(e){try{return await this._useSession(async t=>{let{data:{session:n},error:r}=t;if(r)return this._returnResult({data:null,error:r});if(!n)return this._returnResult({data:null,error:new L});let{data:i,error:a}=await J(this.fetch,`POST`,`${this.url}/passkeys/registration/verify`,{headers:this.headers,jwt:n.access_token,body:{challenge_id:e.challengeId,credential:e.credential}});return a?this._returnResult({data:null,error:a}):this._returnResult({data:i,error:null})})}catch(e){if(P(e))return this._returnResult({data:null,error:e});throw e}}async _startPasskeyAuthentication(e){try{let{data:t,error:n}=await J(this.fetch,`POST`,`${this.url}/passkeys/authentication/options`,{headers:this.headers,body:{gotrue_meta_security:{captcha_token:e?.options?.captchaToken}}});return n?this._returnResult({data:null,error:n}):this._returnResult({data:t,error:null})}catch(e){if(P(e))return this._returnResult({data:null,error:e});throw e}}async _verifyPasskeyAuthentication(e){try{let{data:t,error:n}=await J(this.fetch,`POST`,`${this.url}/passkeys/authentication/verify`,{headers:this.headers,body:{challenge_id:e.challengeId,credential:e.credential},xform:Y});return n?this._returnResult({data:null,error:n}):(t.session&&(await this._saveSession(t.session),await this._notifyAllSubscribers(`SIGNED_IN`,t.session)),this._returnResult({data:t,error:null}))}catch(e){if(P(e))return this._returnResult({data:null,error:e});throw e}}async _listPasskeys(){try{return await this._useSession(async e=>{let{data:{session:t},error:n}=e;if(n)return this._returnResult({data:null,error:n});if(!t)return this._returnResult({data:null,error:new L});let{data:r,error:i}=await J(this.fetch,`GET`,`${this.url}/passkeys`,{headers:this.headers,jwt:t.access_token,xform:e=>({data:e,error:null})});return i?this._returnResult({data:null,error:i}):this._returnResult({data:r,error:null})})}catch(e){if(P(e))return this._returnResult({data:null,error:e});throw e}}async _updatePasskey(e){try{return await this._useSession(async t=>{let{data:{session:n},error:r}=t;if(r)return this._returnResult({data:null,error:r});if(!n)return this._returnResult({data:null,error:new L});let{data:i,error:a}=await J(this.fetch,`PATCH`,`${this.url}/passkeys/${e.passkeyId}`,{headers:this.headers,jwt:n.access_token,body:{friendly_name:e.friendlyName}});return a?this._returnResult({data:null,error:a}):this._returnResult({data:i,error:null})})}catch(e){if(P(e))return this._returnResult({data:null,error:e});throw e}}async _deletePasskey(e){try{return await this._useSession(async t=>{let{data:{session:n},error:r}=t;if(r)return this._returnResult({data:null,error:r});if(!n)return this._returnResult({data:null,error:new L});let{error:i}=await J(this.fetch,`DELETE`,`${this.url}/passkeys/${e.passkeyId}`,{headers:this.headers,jwt:n.access_token,noResolveJson:!0});return i?this._returnResult({data:null,error:i}):this._returnResult({data:null,error:null})})}catch(e){if(P(e))return this._returnResult({data:null,error:e});throw e}}};qi.nextInstanceID={};var Ji=qi,Yi=mi,Xi=Ji,Zi=class extends Xi{constructor(e){super(e)}},Qi=class{constructor(e,t,n){this.supabaseUrl=e,this.supabaseKey=t;let r=Un(e);if(!t)throw Error(`supabaseKey is required.`);Nn(t),Vn(n),this.realtimeUrl=new URL(`realtime/v1`,r),this.realtimeUrl.protocol=this.realtimeUrl.protocol.replace(`http`,`ws`),this.authUrl=new URL(`auth/v1`,r),this.storageUrl=new URL(`storage/v1`,r),this.functionsUrl=new URL(`functions/v1`,r);let i=`sb-${r.hostname.split(`.`)[0]}-auth-token`,a={db:yn,realtime:xn,auth:{...bn,storageKey:i},global:vn,tracePropagation:Sn},o=Hn(n??{},a);this.settings=o,this.storageKey=o.auth.storageKey??``,this.headers=o.global.headers??{},o.accessToken?(this.accessToken=o.accessToken,this.auth=new Proxy({},{get:(e,t)=>{throw Error(`@supabase/supabase-js: Supabase Client is configured with the accessToken option, accessing supabase.auth.${String(t)} is not possible`)}})):this.auth=this._initSupabaseAuthClient(o.auth??{},this.headers,o.global.fetch),this.fetch=Pn(t,e,this._getSessionToken.bind(this),o.global.fetch,o.tracePropagation),this.functionsFetch=Pn(t,e,this._getSessionToken.bind(this),o.global.fetch,o.tracePropagation,{omitApiKeyAsBearer:!0}),this.realtime=this._initRealtimeClient({headers:this.headers,accessToken:this._getAccessToken.bind(this),fetch:this.fetch,...o.realtime}),this.accessToken&&Promise.resolve(this.accessToken()).then(e=>this.realtime.setAuth(e)).catch(e=>console.warn(`Failed to set initial Realtime auth token:`,e)),this.rest=new fe(new URL(`rest/v1`,r).href,{headers:this.headers,schema:o.db.schema,fetch:this.fetch,timeout:o.db.timeout,urlLengthLimit:o.db.urlLengthLimit,retry:o.db.retry}),this.storage=new mn(this.storageUrl.href,this.headers,this.fetch,n?.storage),o.accessToken||this._listenForAuthEvents()}get functions(){return new l(this.functionsUrl.href,{headers:this.headers,customFetch:this.functionsFetch})}from(e){return this.rest.from(e)}schema(e){return this.rest.schema(e)}getOpenApiSpec(){return this.rest.getOpenApiSpec()}rpc(e,t={},n={head:!1,get:!1,count:void 0}){return this.rest.rpc(e,t,n)}channel(e,t={config:{}}){return this.realtime.channel(e,t)}getChannels(){return this.realtime.getChannels()}removeChannel(e){return this.realtime.removeChannel(e)}removeAllChannels(){return this.realtime.removeAllChannels()}async _getSessionToken(){if(this.accessToken)return await this.accessToken();let{data:e}=await this.auth.getSession();return e.session?.access_token??null}async _getAccessToken(){return await this._getSessionToken()??this.supabaseKey}_initSupabaseAuthClient({autoRefreshToken:e,persistSession:t,detectSessionInUrl:n,storage:r,userStorage:i,storageKey:a,flowType:o,lock:s,debug:c,throwOnError:l,experimental:u,lockAcquireTimeout:d,skipAutoInitialize:f},p,m){let h={Authorization:`Bearer ${this.supabaseKey}`,apikey:`${this.supabaseKey}`};return new Zi({url:this.authUrl.href,headers:{...h,...p},storageKey:a,autoRefreshToken:e,persistSession:t,detectSessionInUrl:n,storage:r,userStorage:i,flowType:o,lock:s,debug:c,throwOnError:l,experimental:u,fetch:m,lockAcquireTimeout:d,skipAutoInitialize:f,hasCustomAuthorizationHeader:Object.keys(this.headers).some(e=>e.toLowerCase()===`authorization`)})}_initRealtimeClient(e){return new _t(this.realtimeUrl.href,{...e,params:{apikey:this.supabaseKey,...e?.params}})}_listenForAuthEvents(){return this.auth.onAuthStateChange((e,t)=>{this._handleTokenChanged(e,`CLIENT`,t?.access_token)})}_handleTokenChanged(e,t,n){(e===`TOKEN_REFRESHED`||e===`SIGNED_IN`||e===`INITIAL_SESSION`)&&this.changedAccessToken!==n?(this.changedAccessToken=n,this.realtime.setAuth(n)):e===`SIGNED_OUT`&&(this.realtime.setAuth(),t==`STORAGE`&&this.auth.signOut(),this.changedAccessToken=void 0)}};let $i=(e,t,n)=>new Qi(e,t,n);function ea(){if(typeof window<`u`||globalThis.Deno!==void 0)return!1;let e=globalThis.process;if(!e)return!1;let t=e.version;if(t==null)return!1;let n=t.match(/^v(\d+)\./);return n?parseInt(n[1],10)<=20:!1}return ea()&&console.warn(`⚠️  Node.js 20 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 22 or later. For more information, visit: https://github.com/orgs/supabase/discussions/45715`),e.AuthAdminApi=Yi,e.AuthApiError=Zn,e.AuthClient=Xi,e.AuthError=Xn,e.AuthImplicitGrantRedirectError=tr,e.AuthInvalidCredentialsError=er,e.AuthInvalidJwtError=fr,e.AuthInvalidTokenResponseError=R,e.AuthPKCECodeVerifierMissingError=ir,e.AuthPKCEGrantCodeExchangeError=rr,e.AuthRefreshDiscardedError=cr,e.AuthRetryableFetchError=or,e.AuthSessionMissingError=L,e.AuthUnknownError=F,e.AuthWeakPasswordError=ur,e.CustomAuthError=I,Object.defineProperty(e,`FunctionRegion`,{enumerable:!0,get:function(){return c}}),e.FunctionsError=i,e.FunctionsFetchError=a,e.FunctionsHttpError=s,e.FunctionsRelayError=o,e.GoTrueAdminApi=mi,e.GoTrueClient=Ji,e.NavigatorLockAcquireTimeoutError=_i,e.PostgrestError=u,e.REALTIME_CHANNEL_STATES=ut,Object.defineProperty(e,`REALTIME_LISTEN_TYPES`,{enumerable:!0,get:function(){return T}}),Object.defineProperty(e,`REALTIME_POSTGRES_CHANGES_LISTEN_EVENT`,{enumerable:!0,get:function(){return lt}}),Object.defineProperty(e,`REALTIME_PRESENCE_LISTEN_EVENTS`,{enumerable:!0,get:function(){return Xe}}),Object.defineProperty(e,`REALTIME_SUBSCRIBE_STATES`,{enumerable:!0,get:function(){return E}}),e.RealtimeChannel=dt,e.RealtimeClient=_t,e.RealtimePostgresFilterBuilder=st,e.RealtimePresence=Ze,e.SIGN_OUT_SCOPES=pi,e.StorageApiError=Pt,e.SupabaseClient=Qi,e.WebSocketFactory=pe,e.createClient=$i,e.isAuthApiError=Qn,e.isAuthError=P,e.isAuthImplicitGrantRedirectError=nr,e.isAuthPKCECodeVerifierMissingError=ar,e.isAuthRefreshDiscardedError=lr,e.isAuthRetryableFetchError=sr,e.isAuthSessionMissingError=$n,e.isAuthWeakPasswordError=dr,e.lockInternals=Z,e.navigatorLock=yi,e.postgresChangesFilter=ct,e.processLock=xi,e})({});
 </script>
 <script>
+/* ---- nacl-fast.min.js ---- */
+!function(i){"use strict";var v=function(r){var t,n=new Float64Array(16);if(r)for(t=0;t<r.length;t++)n[t]=r[t];return n},h=function(){throw new Error("no PRNG")},o=new Uint8Array(16),n=new Uint8Array(32);n[0]=9;var s=v(),u=v([1]),p=v([56129,1]),c=v([30883,4953,19914,30187,55467,16705,2637,112,59544,30585,16505,36039,65139,11119,27886,20995]),y=v([61785,9906,39828,60374,45398,33411,5274,224,53552,61171,33010,6542,64743,22239,55772,9222]),e=v([54554,36645,11616,51542,42930,38181,51040,26924,56412,64982,57905,49316,21502,52590,14035,8553]),a=v([26200,26214,26214,26214,26214,26214,26214,26214,26214,26214,26214,26214,26214,26214,26214,26214]),l=v([41136,18958,6951,50414,58488,44335,6150,12099,55207,15867,153,11085,57099,20417,9344,11139]);function f(r,t,n,e){r[t]=n>>24&255,r[t+1]=n>>16&255,r[t+2]=n>>8&255,r[t+3]=255&n,r[t+4]=e>>24&255,r[t+5]=e>>16&255,r[t+6]=e>>8&255,r[t+7]=255&e}function w(r,t,n,e,o){var i,h=0;for(i=0;i<o;i++)h|=r[t+i]^n[e+i];return(1&h-1>>>8)-1}function b(r,t,n,e){return w(r,t,n,e,16)}function g(r,t,n,e){return w(r,t,n,e,32)}function A(r,t,n,e){!function(r,t,n,e){for(var o,i=255&e[0]|(255&e[1])<<8|(255&e[2])<<16|(255&e[3])<<24,h=255&n[0]|(255&n[1])<<8|(255&n[2])<<16|(255&n[3])<<24,a=255&n[4]|(255&n[5])<<8|(255&n[6])<<16|(255&n[7])<<24,f=255&n[8]|(255&n[9])<<8|(255&n[10])<<16|(255&n[11])<<24,s=255&n[12]|(255&n[13])<<8|(255&n[14])<<16|(255&n[15])<<24,u=255&e[4]|(255&e[5])<<8|(255&e[6])<<16|(255&e[7])<<24,c=255&t[0]|(255&t[1])<<8|(255&t[2])<<16|(255&t[3])<<24,y=255&t[4]|(255&t[5])<<8|(255&t[6])<<16|(255&t[7])<<24,l=255&t[8]|(255&t[9])<<8|(255&t[10])<<16|(255&t[11])<<24,w=255&t[12]|(255&t[13])<<8|(255&t[14])<<16|(255&t[15])<<24,v=255&e[8]|(255&e[9])<<8|(255&e[10])<<16|(255&e[11])<<24,p=255&n[16]|(255&n[17])<<8|(255&n[18])<<16|(255&n[19])<<24,b=255&n[20]|(255&n[21])<<8|(255&n[22])<<16|(255&n[23])<<24,g=255&n[24]|(255&n[25])<<8|(255&n[26])<<16|(255&n[27])<<24,A=255&n[28]|(255&n[29])<<8|(255&n[30])<<16|(255&n[31])<<24,_=255&e[12]|(255&e[13])<<8|(255&e[14])<<16|(255&e[15])<<24,U=i,d=h,E=a,x=f,M=s,m=u,B=c,S=y,k=l,K=w,Y=v,L=p,T=b,z=g,R=A,P=_,N=0;N<20;N+=2)U^=(o=(T^=(o=(k^=(o=(M^=(o=U+T|0)<<7|o>>>25)+U|0)<<9|o>>>23)+M|0)<<13|o>>>19)+k|0)<<18|o>>>14,m^=(o=(d^=(o=(z^=(o=(K^=(o=m+d|0)<<7|o>>>25)+m|0)<<9|o>>>23)+K|0)<<13|o>>>19)+z|0)<<18|o>>>14,Y^=(o=(B^=(o=(E^=(o=(R^=(o=Y+B|0)<<7|o>>>25)+Y|0)<<9|o>>>23)+R|0)<<13|o>>>19)+E|0)<<18|o>>>14,P^=(o=(L^=(o=(S^=(o=(x^=(o=P+L|0)<<7|o>>>25)+P|0)<<9|o>>>23)+x|0)<<13|o>>>19)+S|0)<<18|o>>>14,U^=(o=(x^=(o=(E^=(o=(d^=(o=U+x|0)<<7|o>>>25)+U|0)<<9|o>>>23)+d|0)<<13|o>>>19)+E|0)<<18|o>>>14,m^=(o=(M^=(o=(S^=(o=(B^=(o=m+M|0)<<7|o>>>25)+m|0)<<9|o>>>23)+B|0)<<13|o>>>19)+S|0)<<18|o>>>14,Y^=(o=(K^=(o=(k^=(o=(L^=(o=Y+K|0)<<7|o>>>25)+Y|0)<<9|o>>>23)+L|0)<<13|o>>>19)+k|0)<<18|o>>>14,P^=(o=(R^=(o=(z^=(o=(T^=(o=P+R|0)<<7|o>>>25)+P|0)<<9|o>>>23)+T|0)<<13|o>>>19)+z|0)<<18|o>>>14;U=U+i|0,d=d+h|0,E=E+a|0,x=x+f|0,M=M+s|0,m=m+u|0,B=B+c|0,S=S+y|0,k=k+l|0,K=K+w|0,Y=Y+v|0,L=L+p|0,T=T+b|0,z=z+g|0,R=R+A|0,P=P+_|0,r[0]=U>>>0&255,r[1]=U>>>8&255,r[2]=U>>>16&255,r[3]=U>>>24&255,r[4]=d>>>0&255,r[5]=d>>>8&255,r[6]=d>>>16&255,r[7]=d>>>24&255,r[8]=E>>>0&255,r[9]=E>>>8&255,r[10]=E>>>16&255,r[11]=E>>>24&255,r[12]=x>>>0&255,r[13]=x>>>8&255,r[14]=x>>>16&255,r[15]=x>>>24&255,r[16]=M>>>0&255,r[17]=M>>>8&255,r[18]=M>>>16&255,r[19]=M>>>24&255,r[20]=m>>>0&255,r[21]=m>>>8&255,r[22]=m>>>16&255,r[23]=m>>>24&255,r[24]=B>>>0&255,r[25]=B>>>8&255,r[26]=B>>>16&255,r[27]=B>>>24&255,r[28]=S>>>0&255,r[29]=S>>>8&255,r[30]=S>>>16&255,r[31]=S>>>24&255,r[32]=k>>>0&255,r[33]=k>>>8&255,r[34]=k>>>16&255,r[35]=k>>>24&255,r[36]=K>>>0&255,r[37]=K>>>8&255,r[38]=K>>>16&255,r[39]=K>>>24&255,r[40]=Y>>>0&255,r[41]=Y>>>8&255,r[42]=Y>>>16&255,r[43]=Y>>>24&255,r[44]=L>>>0&255,r[45]=L>>>8&255,r[46]=L>>>16&255,r[47]=L>>>24&255,r[48]=T>>>0&255,r[49]=T>>>8&255,r[50]=T>>>16&255,r[51]=T>>>24&255,r[52]=z>>>0&255,r[53]=z>>>8&255,r[54]=z>>>16&255,r[55]=z>>>24&255,r[56]=R>>>0&255,r[57]=R>>>8&255,r[58]=R>>>16&255,r[59]=R>>>24&255,r[60]=P>>>0&255,r[61]=P>>>8&255,r[62]=P>>>16&255,r[63]=P>>>24&255}(r,t,n,e)}function _(r,t,n,e){!function(r,t,n,e){for(var o,i=255&e[0]|(255&e[1])<<8|(255&e[2])<<16|(255&e[3])<<24,h=255&n[0]|(255&n[1])<<8|(255&n[2])<<16|(255&n[3])<<24,a=255&n[4]|(255&n[5])<<8|(255&n[6])<<16|(255&n[7])<<24,f=255&n[8]|(255&n[9])<<8|(255&n[10])<<16|(255&n[11])<<24,s=255&n[12]|(255&n[13])<<8|(255&n[14])<<16|(255&n[15])<<24,u=255&e[4]|(255&e[5])<<8|(255&e[6])<<16|(255&e[7])<<24,c=255&t[0]|(255&t[1])<<8|(255&t[2])<<16|(255&t[3])<<24,y=255&t[4]|(255&t[5])<<8|(255&t[6])<<16|(255&t[7])<<24,l=255&t[8]|(255&t[9])<<8|(255&t[10])<<16|(255&t[11])<<24,w=255&t[12]|(255&t[13])<<8|(255&t[14])<<16|(255&t[15])<<24,v=255&e[8]|(255&e[9])<<8|(255&e[10])<<16|(255&e[11])<<24,p=255&n[16]|(255&n[17])<<8|(255&n[18])<<16|(255&n[19])<<24,b=255&n[20]|(255&n[21])<<8|(255&n[22])<<16|(255&n[23])<<24,g=255&n[24]|(255&n[25])<<8|(255&n[26])<<16|(255&n[27])<<24,A=255&n[28]|(255&n[29])<<8|(255&n[30])<<16|(255&n[31])<<24,_=255&e[12]|(255&e[13])<<8|(255&e[14])<<16|(255&e[15])<<24,U=0;U<20;U+=2)i^=(o=(b^=(o=(l^=(o=(s^=(o=i+b|0)<<7|o>>>25)+i|0)<<9|o>>>23)+s|0)<<13|o>>>19)+l|0)<<18|o>>>14,u^=(o=(h^=(o=(g^=(o=(w^=(o=u+h|0)<<7|o>>>25)+u|0)<<9|o>>>23)+w|0)<<13|o>>>19)+g|0)<<18|o>>>14,v^=(o=(c^=(o=(a^=(o=(A^=(o=v+c|0)<<7|o>>>25)+v|0)<<9|o>>>23)+A|0)<<13|o>>>19)+a|0)<<18|o>>>14,_^=(o=(p^=(o=(y^=(o=(f^=(o=_+p|0)<<7|o>>>25)+_|0)<<9|o>>>23)+f|0)<<13|o>>>19)+y|0)<<18|o>>>14,i^=(o=(f^=(o=(a^=(o=(h^=(o=i+f|0)<<7|o>>>25)+i|0)<<9|o>>>23)+h|0)<<13|o>>>19)+a|0)<<18|o>>>14,u^=(o=(s^=(o=(y^=(o=(c^=(o=u+s|0)<<7|o>>>25)+u|0)<<9|o>>>23)+c|0)<<13|o>>>19)+y|0)<<18|o>>>14,v^=(o=(w^=(o=(l^=(o=(p^=(o=v+w|0)<<7|o>>>25)+v|0)<<9|o>>>23)+p|0)<<13|o>>>19)+l|0)<<18|o>>>14,_^=(o=(A^=(o=(g^=(o=(b^=(o=_+A|0)<<7|o>>>25)+_|0)<<9|o>>>23)+b|0)<<13|o>>>19)+g|0)<<18|o>>>14;r[0]=i>>>0&255,r[1]=i>>>8&255,r[2]=i>>>16&255,r[3]=i>>>24&255,r[4]=u>>>0&255,r[5]=u>>>8&255,r[6]=u>>>16&255,r[7]=u>>>24&255,r[8]=v>>>0&255,r[9]=v>>>8&255,r[10]=v>>>16&255,r[11]=v>>>24&255,r[12]=_>>>0&255,r[13]=_>>>8&255,r[14]=_>>>16&255,r[15]=_>>>24&255,r[16]=c>>>0&255,r[17]=c>>>8&255,r[18]=c>>>16&255,r[19]=c>>>24&255,r[20]=y>>>0&255,r[21]=y>>>8&255,r[22]=y>>>16&255,r[23]=y>>>24&255,r[24]=l>>>0&255,r[25]=l>>>8&255,r[26]=l>>>16&255,r[27]=l>>>24&255,r[28]=w>>>0&255,r[29]=w>>>8&255,r[30]=w>>>16&255,r[31]=w>>>24&255}(r,t,n,e)}var U=new Uint8Array([101,120,112,97,110,100,32,51,50,45,98,121,116,101,32,107]);function d(r,t,n,e,o,i,h){var a,f,s=new Uint8Array(16),u=new Uint8Array(64);for(f=0;f<16;f++)s[f]=0;for(f=0;f<8;f++)s[f]=i[f];for(;64<=o;){for(A(u,s,h,U),f=0;f<64;f++)r[t+f]=n[e+f]^u[f];for(a=1,f=8;f<16;f++)a=a+(255&s[f])|0,s[f]=255&a,a>>>=8;o-=64,t+=64,e+=64}if(0<o)for(A(u,s,h,U),f=0;f<o;f++)r[t+f]=n[e+f]^u[f];return 0}function E(r,t,n,e,o){var i,h,a=new Uint8Array(16),f=new Uint8Array(64);for(h=0;h<16;h++)a[h]=0;for(h=0;h<8;h++)a[h]=e[h];for(;64<=n;){for(A(f,a,o,U),h=0;h<64;h++)r[t+h]=f[h];for(i=1,h=8;h<16;h++)i=i+(255&a[h])|0,a[h]=255&i,i>>>=8;n-=64,t+=64}if(0<n)for(A(f,a,o,U),h=0;h<n;h++)r[t+h]=f[h];return 0}function x(r,t,n,e,o){var i=new Uint8Array(32);_(i,e,o,U);for(var h=new Uint8Array(8),a=0;a<8;a++)h[a]=e[a+16];return E(r,t,n,h,i)}function M(r,t,n,e,o,i,h){var a=new Uint8Array(32);_(a,i,h,U);for(var f=new Uint8Array(8),s=0;s<8;s++)f[s]=i[s+16];return d(r,t,n,e,o,f,a)}var m=function(r){var t,n,e,o,i,h,a,f;this.buffer=new Uint8Array(16),this.r=new Uint16Array(10),this.h=new Uint16Array(10),this.pad=new Uint16Array(8),this.leftover=0,t=255&r[this.fin=0]|(255&r[1])<<8,this.r[0]=8191&t,n=255&r[2]|(255&r[3])<<8,this.r[1]=8191&(t>>>13|n<<3),e=255&r[4]|(255&r[5])<<8,this.r[2]=7939&(n>>>10|e<<6),o=255&r[6]|(255&r[7])<<8,this.r[3]=8191&(e>>>7|o<<9),i=255&r[8]|(255&r[9])<<8,this.r[4]=255&(o>>>4|i<<12),this.r[5]=i>>>1&8190,h=255&r[10]|(255&r[11])<<8,this.r[6]=8191&(i>>>14|h<<2),a=255&r[12]|(255&r[13])<<8,this.r[7]=8065&(h>>>11|a<<5),f=255&r[14]|(255&r[15])<<8,this.r[8]=8191&(a>>>8|f<<8),this.r[9]=f>>>5&127,this.pad[0]=255&r[16]|(255&r[17])<<8,this.pad[1]=255&r[18]|(255&r[19])<<8,this.pad[2]=255&r[20]|(255&r[21])<<8,this.pad[3]=255&r[22]|(255&r[23])<<8,this.pad[4]=255&r[24]|(255&r[25])<<8,this.pad[5]=255&r[26]|(255&r[27])<<8,this.pad[6]=255&r[28]|(255&r[29])<<8,this.pad[7]=255&r[30]|(255&r[31])<<8};function B(r,t,n,e,o,i){var h=new m(i);return h.update(n,e,o),h.finish(r,t),0}function S(r,t,n,e,o,i){var h=new Uint8Array(16);return B(h,0,n,e,o,i),b(r,t,h,0)}function k(r,t,n,e,o){var i;if(n<32)return-1;for(M(r,0,t,0,n,e,o),B(r,16,r,32,n-32,r),i=0;i<16;i++)r[i]=0;return 0}function K(r,t,n,e,o){var i,h=new Uint8Array(32);if(n<32)return-1;if(x(h,0,32,e,o),0!==S(t,16,t,32,n-32,h))return-1;for(M(r,0,t,0,n,e,o),i=0;i<32;i++)r[i]=0;return 0}function Y(r,t){var n;for(n=0;n<16;n++)r[n]=0|t[n]}function L(r){var t,n,e=1;for(t=0;t<16;t++)n=r[t]+e+65535,e=Math.floor(n/65536),r[t]=n-65536*e;r[0]+=e-1+37*(e-1)}function T(r,t,n){for(var e,o=~(n-1),i=0;i<16;i++)e=o&(r[i]^t[i]),r[i]^=e,t[i]^=e}function z(r,t){var n,e,o,i=v(),h=v();for(n=0;n<16;n++)h[n]=t[n];for(L(h),L(h),L(h),e=0;e<2;e++){for(i[0]=h[0]-65517,n=1;n<15;n++)i[n]=h[n]-65535-(i[n-1]>>16&1),i[n-1]&=65535;i[15]=h[15]-32767-(i[14]>>16&1),o=i[15]>>16&1,i[14]&=65535,T(h,i,1-o)}for(n=0;n<16;n++)r[2*n]=255&h[n],r[2*n+1]=h[n]>>8}function R(r,t){var n=new Uint8Array(32),e=new Uint8Array(32);return z(n,r),z(e,t),g(n,0,e,0)}function P(r){var t=new Uint8Array(32);return z(t,r),1&t[0]}function N(r,t){var n;for(n=0;n<16;n++)r[n]=t[2*n]+(t[2*n+1]<<8);r[15]&=32767}function O(r,t,n){for(var e=0;e<16;e++)r[e]=t[e]+n[e]}function C(r,t,n){for(var e=0;e<16;e++)r[e]=t[e]-n[e]}function F(r,t,n){var e,o,i=0,h=0,a=0,f=0,s=0,u=0,c=0,y=0,l=0,w=0,v=0,p=0,b=0,g=0,A=0,_=0,U=0,d=0,E=0,x=0,M=0,m=0,B=0,S=0,k=0,K=0,Y=0,L=0,T=0,z=0,R=0,P=n[0],N=n[1],O=n[2],C=n[3],F=n[4],I=n[5],Z=n[6],G=n[7],q=n[8],D=n[9],V=n[10],X=n[11],j=n[12],H=n[13],J=n[14],Q=n[15];i+=(e=t[0])*P,h+=e*N,a+=e*O,f+=e*C,s+=e*F,u+=e*I,c+=e*Z,y+=e*G,l+=e*q,w+=e*D,v+=e*V,p+=e*X,b+=e*j,g+=e*H,A+=e*J,_+=e*Q,h+=(e=t[1])*P,a+=e*N,f+=e*O,s+=e*C,u+=e*F,c+=e*I,y+=e*Z,l+=e*G,w+=e*q,v+=e*D,p+=e*V,b+=e*X,g+=e*j,A+=e*H,_+=e*J,U+=e*Q,a+=(e=t[2])*P,f+=e*N,s+=e*O,u+=e*C,c+=e*F,y+=e*I,l+=e*Z,w+=e*G,v+=e*q,p+=e*D,b+=e*V,g+=e*X,A+=e*j,_+=e*H,U+=e*J,d+=e*Q,f+=(e=t[3])*P,s+=e*N,u+=e*O,c+=e*C,y+=e*F,l+=e*I,w+=e*Z,v+=e*G,p+=e*q,b+=e*D,g+=e*V,A+=e*X,_+=e*j,U+=e*H,d+=e*J,E+=e*Q,s+=(e=t[4])*P,u+=e*N,c+=e*O,y+=e*C,l+=e*F,w+=e*I,v+=e*Z,p+=e*G,b+=e*q,g+=e*D,A+=e*V,_+=e*X,U+=e*j,d+=e*H,E+=e*J,x+=e*Q,u+=(e=t[5])*P,c+=e*N,y+=e*O,l+=e*C,w+=e*F,v+=e*I,p+=e*Z,b+=e*G,g+=e*q,A+=e*D,_+=e*V,U+=e*X,d+=e*j,E+=e*H,x+=e*J,M+=e*Q,c+=(e=t[6])*P,y+=e*N,l+=e*O,w+=e*C,v+=e*F,p+=e*I,b+=e*Z,g+=e*G,A+=e*q,_+=e*D,U+=e*V,d+=e*X,E+=e*j,x+=e*H,M+=e*J,m+=e*Q,y+=(e=t[7])*P,l+=e*N,w+=e*O,v+=e*C,p+=e*F,b+=e*I,g+=e*Z,A+=e*G,_+=e*q,U+=e*D,d+=e*V,E+=e*X,x+=e*j,M+=e*H,m+=e*J,B+=e*Q,l+=(e=t[8])*P,w+=e*N,v+=e*O,p+=e*C,b+=e*F,g+=e*I,A+=e*Z,_+=e*G,U+=e*q,d+=e*D,E+=e*V,x+=e*X,M+=e*j,m+=e*H,B+=e*J,S+=e*Q,w+=(e=t[9])*P,v+=e*N,p+=e*O,b+=e*C,g+=e*F,A+=e*I,_+=e*Z,U+=e*G,d+=e*q,E+=e*D,x+=e*V,M+=e*X,m+=e*j,B+=e*H,S+=e*J,k+=e*Q,v+=(e=t[10])*P,p+=e*N,b+=e*O,g+=e*C,A+=e*F,_+=e*I,U+=e*Z,d+=e*G,E+=e*q,x+=e*D,M+=e*V,m+=e*X,B+=e*j,S+=e*H,k+=e*J,K+=e*Q,p+=(e=t[11])*P,b+=e*N,g+=e*O,A+=e*C,_+=e*F,U+=e*I,d+=e*Z,E+=e*G,x+=e*q,M+=e*D,m+=e*V,B+=e*X,S+=e*j,k+=e*H,K+=e*J,Y+=e*Q,b+=(e=t[12])*P,g+=e*N,A+=e*O,_+=e*C,U+=e*F,d+=e*I,E+=e*Z,x+=e*G,M+=e*q,m+=e*D,B+=e*V,S+=e*X,k+=e*j,K+=e*H,Y+=e*J,L+=e*Q,g+=(e=t[13])*P,A+=e*N,_+=e*O,U+=e*C,d+=e*F,E+=e*I,x+=e*Z,M+=e*G,m+=e*q,B+=e*D,S+=e*V,k+=e*X,K+=e*j,Y+=e*H,L+=e*J,T+=e*Q,A+=(e=t[14])*P,_+=e*N,U+=e*O,d+=e*C,E+=e*F,x+=e*I,M+=e*Z,m+=e*G,B+=e*q,S+=e*D,k+=e*V,K+=e*X,Y+=e*j,L+=e*H,T+=e*J,z+=e*Q,_+=(e=t[15])*P,h+=38*(d+=e*O),a+=38*(E+=e*C),f+=38*(x+=e*F),s+=38*(M+=e*I),u+=38*(m+=e*Z),c+=38*(B+=e*G),y+=38*(S+=e*q),l+=38*(k+=e*D),w+=38*(K+=e*V),v+=38*(Y+=e*X),p+=38*(L+=e*j),b+=38*(T+=e*H),g+=38*(z+=e*J),A+=38*(R+=e*Q),i=(e=(i+=38*(U+=e*N))+(o=1)+65535)-65536*(o=Math.floor(e/65536)),h=(e=h+o+65535)-65536*(o=Math.floor(e/65536)),a=(e=a+o+65535)-65536*(o=Math.floor(e/65536)),f=(e=f+o+65535)-65536*(o=Math.floor(e/65536)),s=(e=s+o+65535)-65536*(o=Math.floor(e/65536)),u=(e=u+o+65535)-65536*(o=Math.floor(e/65536)),c=(e=c+o+65535)-65536*(o=Math.floor(e/65536)),y=(e=y+o+65535)-65536*(o=Math.floor(e/65536)),l=(e=l+o+65535)-65536*(o=Math.floor(e/65536)),w=(e=w+o+65535)-65536*(o=Math.floor(e/65536)),v=(e=v+o+65535)-65536*(o=Math.floor(e/65536)),p=(e=p+o+65535)-65536*(o=Math.floor(e/65536)),b=(e=b+o+65535)-65536*(o=Math.floor(e/65536)),g=(e=g+o+65535)-65536*(o=Math.floor(e/65536)),A=(e=A+o+65535)-65536*(o=Math.floor(e/65536)),_=(e=_+o+65535)-65536*(o=Math.floor(e/65536)),i=(e=(i+=o-1+37*(o-1))+(o=1)+65535)-65536*(o=Math.floor(e/65536)),h=(e=h+o+65535)-65536*(o=Math.floor(e/65536)),a=(e=a+o+65535)-65536*(o=Math.floor(e/65536)),f=(e=f+o+65535)-65536*(o=Math.floor(e/65536)),s=(e=s+o+65535)-65536*(o=Math.floor(e/65536)),u=(e=u+o+65535)-65536*(o=Math.floor(e/65536)),c=(e=c+o+65535)-65536*(o=Math.floor(e/65536)),y=(e=y+o+65535)-65536*(o=Math.floor(e/65536)),l=(e=l+o+65535)-65536*(o=Math.floor(e/65536)),w=(e=w+o+65535)-65536*(o=Math.floor(e/65536)),v=(e=v+o+65535)-65536*(o=Math.floor(e/65536)),p=(e=p+o+65535)-65536*(o=Math.floor(e/65536)),b=(e=b+o+65535)-65536*(o=Math.floor(e/65536)),g=(e=g+o+65535)-65536*(o=Math.floor(e/65536)),A=(e=A+o+65535)-65536*(o=Math.floor(e/65536)),_=(e=_+o+65535)-65536*(o=Math.floor(e/65536)),i+=o-1+37*(o-1),r[0]=i,r[1]=h,r[2]=a,r[3]=f,r[4]=s,r[5]=u,r[6]=c,r[7]=y,r[8]=l,r[9]=w,r[10]=v,r[11]=p,r[12]=b,r[13]=g,r[14]=A,r[15]=_}function I(r,t){F(r,t,t)}function Z(r,t){var n,e=v();for(n=0;n<16;n++)e[n]=t[n];for(n=253;0<=n;n--)I(e,e),2!==n&&4!==n&&F(e,e,t);for(n=0;n<16;n++)r[n]=e[n]}function G(r,t){var n,e=v();for(n=0;n<16;n++)e[n]=t[n];for(n=250;0<=n;n--)I(e,e),1!==n&&F(e,e,t);for(n=0;n<16;n++)r[n]=e[n]}function q(r,t,n){var e,o,i=new Uint8Array(32),h=new Float64Array(80),a=v(),f=v(),s=v(),u=v(),c=v(),y=v();for(o=0;o<31;o++)i[o]=t[o];for(i[31]=127&t[31]|64,i[0]&=248,N(h,n),o=0;o<16;o++)f[o]=h[o],u[o]=a[o]=s[o]=0;for(a[0]=u[0]=1,o=254;0<=o;--o)T(a,f,e=i[o>>>3]>>>(7&o)&1),T(s,u,e),O(c,a,s),C(a,a,s),O(s,f,u),C(f,f,u),I(u,c),I(y,a),F(a,s,a),F(s,f,c),O(c,a,s),C(a,a,s),I(f,a),C(s,u,y),F(a,s,p),O(a,a,u),F(s,s,a),F(a,u,y),F(u,f,h),I(f,c),T(a,f,e),T(s,u,e);for(o=0;o<16;o++)h[o+16]=a[o],h[o+32]=s[o],h[o+48]=f[o],h[o+64]=u[o];var l=h.subarray(32),w=h.subarray(16);return Z(l,l),F(w,w,l),z(r,w),0}function D(r,t){return q(r,t,n)}function V(r,t){return h(t,32),D(r,t)}function X(r,t,n){var e=new Uint8Array(32);return q(e,n,t),_(r,o,e,U)}m.prototype.blocks=function(r,t,n){for(var e,o,i,h,a,f,s,u,c,y,l,w,v,p,b,g,A,_,U,d=this.fin?0:2048,E=this.h[0],x=this.h[1],M=this.h[2],m=this.h[3],B=this.h[4],S=this.h[5],k=this.h[6],K=this.h[7],Y=this.h[8],L=this.h[9],T=this.r[0],z=this.r[1],R=this.r[2],P=this.r[3],N=this.r[4],O=this.r[5],C=this.r[6],F=this.r[7],I=this.r[8],Z=this.r[9];16<=n;)y=c=0,y+=(E+=8191&(e=255&r[t+0]|(255&r[t+1])<<8))*T,y+=(x+=8191&(e>>>13|(o=255&r[t+2]|(255&r[t+3])<<8)<<3))*(5*Z),y+=(M+=8191&(o>>>10|(i=255&r[t+4]|(255&r[t+5])<<8)<<6))*(5*I),y+=(m+=8191&(i>>>7|(h=255&r[t+6]|(255&r[t+7])<<8)<<9))*(5*F),c=(y+=(B+=8191&(h>>>4|(a=255&r[t+8]|(255&r[t+9])<<8)<<12))*(5*C))>>>13,y&=8191,y+=(S+=a>>>1&8191)*(5*O),y+=(k+=8191&(a>>>14|(f=255&r[t+10]|(255&r[t+11])<<8)<<2))*(5*N),y+=(K+=8191&(f>>>11|(s=255&r[t+12]|(255&r[t+13])<<8)<<5))*(5*P),y+=(Y+=8191&(s>>>8|(u=255&r[t+14]|(255&r[t+15])<<8)<<8))*(5*R),l=c+=(y+=(L+=u>>>5|d)*(5*z))>>>13,l+=E*z,l+=x*T,l+=M*(5*Z),l+=m*(5*I),c=(l+=B*(5*F))>>>13,l&=8191,l+=S*(5*C),l+=k*(5*O),l+=K*(5*N),l+=Y*(5*P),c+=(l+=L*(5*R))>>>13,l&=8191,w=c,w+=E*R,w+=x*z,w+=M*T,w+=m*(5*Z),c=(w+=B*(5*I))>>>13,w&=8191,w+=S*(5*F),w+=k*(5*C),w+=K*(5*O),w+=Y*(5*N),v=c+=(w+=L*(5*P))>>>13,v+=E*P,v+=x*R,v+=M*z,v+=m*T,c=(v+=B*(5*Z))>>>13,v&=8191,v+=S*(5*I),v+=k*(5*F),v+=K*(5*C),v+=Y*(5*O),p=c+=(v+=L*(5*N))>>>13,p+=E*N,p+=x*P,p+=M*R,p+=m*z,c=(p+=B*T)>>>13,p&=8191,p+=S*(5*Z),p+=k*(5*I),p+=K*(5*F),p+=Y*(5*C),b=c+=(p+=L*(5*O))>>>13,b+=E*O,b+=x*N,b+=M*P,b+=m*R,c=(b+=B*z)>>>13,b&=8191,b+=S*T,b+=k*(5*Z),b+=K*(5*I),b+=Y*(5*F),g=c+=(b+=L*(5*C))>>>13,g+=E*C,g+=x*O,g+=M*N,g+=m*P,c=(g+=B*R)>>>13,g&=8191,g+=S*z,g+=k*T,g+=K*(5*Z),g+=Y*(5*I),A=c+=(g+=L*(5*F))>>>13,A+=E*F,A+=x*C,A+=M*O,A+=m*N,c=(A+=B*P)>>>13,A&=8191,A+=S*R,A+=k*z,A+=K*T,A+=Y*(5*Z),_=c+=(A+=L*(5*I))>>>13,_+=E*I,_+=x*F,_+=M*C,_+=m*O,c=(_+=B*N)>>>13,_&=8191,_+=S*P,_+=k*R,_+=K*z,_+=Y*T,U=c+=(_+=L*(5*Z))>>>13,U+=E*Z,U+=x*I,U+=M*F,U+=m*C,c=(U+=B*O)>>>13,U&=8191,U+=S*N,U+=k*P,U+=K*R,U+=Y*z,E=y=8191&(c=(c=((c+=(U+=L*T)>>>13)<<2)+c|0)+(y&=8191)|0),x=l+=c>>>=13,M=w&=8191,m=v&=8191,B=p&=8191,S=b&=8191,k=g&=8191,K=A&=8191,Y=_&=8191,L=U&=8191,t+=16,n-=16;this.h[0]=E,this.h[1]=x,this.h[2]=M,this.h[3]=m,this.h[4]=B,this.h[5]=S,this.h[6]=k,this.h[7]=K,this.h[8]=Y,this.h[9]=L},m.prototype.finish=function(r,t){var n,e,o,i,h=new Uint16Array(10);if(this.leftover){for(i=this.leftover,this.buffer[i++]=1;i<16;i++)this.buffer[i]=0;this.fin=1,this.blocks(this.buffer,0,16)}for(n=this.h[1]>>>13,this.h[1]&=8191,i=2;i<10;i++)this.h[i]+=n,n=this.h[i]>>>13,this.h[i]&=8191;for(this.h[0]+=5*n,n=this.h[0]>>>13,this.h[0]&=8191,this.h[1]+=n,n=this.h[1]>>>13,this.h[1]&=8191,this.h[2]+=n,h[0]=this.h[0]+5,n=h[0]>>>13,h[0]&=8191,i=1;i<10;i++)h[i]=this.h[i]+n,n=h[i]>>>13,h[i]&=8191;for(h[9]-=8192,e=(1^n)-1,i=0;i<10;i++)h[i]&=e;for(e=~e,i=0;i<10;i++)this.h[i]=this.h[i]&e|h[i];for(this.h[0]=65535&(this.h[0]|this.h[1]<<13),this.h[1]=65535&(this.h[1]>>>3|this.h[2]<<10),this.h[2]=65535&(this.h[2]>>>6|this.h[3]<<7),this.h[3]=65535&(this.h[3]>>>9|this.h[4]<<4),this.h[4]=65535&(this.h[4]>>>12|this.h[5]<<1|this.h[6]<<14),this.h[5]=65535&(this.h[6]>>>2|this.h[7]<<11),this.h[6]=65535&(this.h[7]>>>5|this.h[8]<<8),this.h[7]=65535&(this.h[8]>>>8|this.h[9]<<5),o=this.h[0]+this.pad[0],this.h[0]=65535&o,i=1;i<8;i++)o=(this.h[i]+this.pad[i]|0)+(o>>>16)|0,this.h[i]=65535&o;r[t+0]=this.h[0]>>>0&255,r[t+1]=this.h[0]>>>8&255,r[t+2]=this.h[1]>>>0&255,r[t+3]=this.h[1]>>>8&255,r[t+4]=this.h[2]>>>0&255,r[t+5]=this.h[2]>>>8&255,r[t+6]=this.h[3]>>>0&255,r[t+7]=this.h[3]>>>8&255,r[t+8]=this.h[4]>>>0&255,r[t+9]=this.h[4]>>>8&255,r[t+10]=this.h[5]>>>0&255,r[t+11]=this.h[5]>>>8&255,r[t+12]=this.h[6]>>>0&255,r[t+13]=this.h[6]>>>8&255,r[t+14]=this.h[7]>>>0&255,r[t+15]=this.h[7]>>>8&255},m.prototype.update=function(r,t,n){var e,o;if(this.leftover){for(n<(o=16-this.leftover)&&(o=n),e=0;e<o;e++)this.buffer[this.leftover+e]=r[t+e];if(n-=o,t+=o,this.leftover+=o,this.leftover<16)return;this.blocks(this.buffer,0,16),this.leftover=0}if(16<=n&&(o=n-n%16,this.blocks(r,t,o),t+=o,n-=o),n){for(e=0;e<n;e++)this.buffer[this.leftover+e]=r[t+e];this.leftover+=n}};var j=k,H=K;var J=[1116352408,3609767458,1899447441,602891725,3049323471,3964484399,3921009573,2173295548,961987163,4081628472,1508970993,3053834265,2453635748,2937671579,2870763221,3664609560,3624381080,2734883394,310598401,1164996542,607225278,1323610764,1426881987,3590304994,1925078388,4068182383,2162078206,991336113,2614888103,633803317,3248222580,3479774868,3835390401,2666613458,4022224774,944711139,264347078,2341262773,604807628,2007800933,770255983,1495990901,1249150122,1856431235,1555081692,3175218132,1996064986,2198950837,2554220882,3999719339,2821834349,766784016,2952996808,2566594879,3210313671,3203337956,3336571891,1034457026,3584528711,2466948901,113926993,3758326383,338241895,168717936,666307205,1188179964,773529912,1546045734,1294757372,1522805485,1396182291,2643833823,1695183700,2343527390,1986661051,1014477480,2177026350,1206759142,2456956037,344077627,2730485921,1290863460,2820302411,3158454273,3259730800,3505952657,3345764771,106217008,3516065817,3606008344,3600352804,1432725776,4094571909,1467031594,275423344,851169720,430227734,3100823752,506948616,1363258195,659060556,3750685593,883997877,3785050280,958139571,3318307427,1322822218,3812723403,1537002063,2003034995,1747873779,3602036899,1955562222,1575990012,2024104815,1125592928,2227730452,2716904306,2361852424,442776044,2428436474,593698344,2756734187,3733110249,3204031479,2999351573,3329325298,3815920427,3391569614,3928383900,3515267271,566280711,3940187606,3454069534,4118630271,4000239992,116418474,1914138554,174292421,2731055270,289380356,3203993006,460393269,320620315,685471733,587496836,852142971,1086792851,1017036298,365543100,1126000580,2618297676,1288033470,3409855158,1501505948,4234509866,1607167915,987167468,1816402316,1246189591];function Q(r,t,n,e){for(var o,i,h,a,f,s,u,c,y,l,w,v,p,b,g,A,_,U,d,E,x,M,m,B,S=new Int32Array(16),k=new Int32Array(16),K=r[0],Y=r[1],L=r[2],T=r[3],z=r[4],R=r[5],P=r[6],N=r[7],O=t[0],C=t[1],F=t[2],I=t[3],Z=t[4],G=t[5],q=t[6],D=t[7],V=0;128<=e;){for(_=0;_<16;_++)U=8*_+V,S[_]=n[U+0]<<24|n[U+1]<<16|n[U+2]<<8|n[U+3],k[_]=n[U+4]<<24|n[U+5]<<16|n[U+6]<<8|n[U+7];for(_=0;_<80;_++)if(o=Y,i=L,h=T,c=C,y=F,l=I,x=65535&(E=D),M=E>>>16,m=65535&(d=N),B=d>>>16,x+=65535&(E=((w=Z)>>>14|(a=z)<<18)^(Z>>>18|z<<14)^(z>>>9|Z<<23)),M+=E>>>16,m+=65535&(d=(z>>>14|Z<<18)^(z>>>18|Z<<14)^(Z>>>9|z<<23)),B+=d>>>16,x+=65535&(E=Z&(v=G)^~Z&(p=q)),M+=E>>>16,m+=65535&(d=z&(f=R)^~z&(s=P)),B+=d>>>16,d=J[2*_],x+=65535&(E=J[2*_+1]),M+=E>>>16,m+=65535&d,B+=d>>>16,d=S[_%16],M+=(E=k[_%16])>>>16,m+=65535&d,B+=d>>>16,m+=(M+=(x+=65535&E)>>>16)>>>16,x=65535&(E=A=65535&x|M<<16),M=E>>>16,m=65535&(d=g=65535&m|(B+=m>>>16)<<16),B=d>>>16,x+=65535&(E=(O>>>28|K<<4)^(K>>>2|O<<30)^(K>>>7|O<<25)),M+=E>>>16,m+=65535&(d=(K>>>28|O<<4)^(O>>>2|K<<30)^(O>>>7|K<<25)),B+=d>>>16,M+=(E=O&C^O&F^C&F)>>>16,m+=65535&(d=K&Y^K&L^Y&L),B+=d>>>16,u=65535&(m+=(M+=(x+=65535&E)>>>16)>>>16)|(B+=m>>>16)<<16,b=65535&x|M<<16,x=65535&(E=l),M=E>>>16,m=65535&(d=h),B=d>>>16,M+=(E=A)>>>16,m+=65535&(d=g),B+=d>>>16,Y=K,L=o,T=i,z=h=65535&(m+=(M+=(x+=65535&E)>>>16)>>>16)|(B+=m>>>16)<<16,R=a,P=f,N=s,K=u,C=O,F=c,I=y,Z=l=65535&x|M<<16,G=w,q=v,D=p,O=b,_%16==15)for(U=0;U<16;U++)d=S[U],x=65535&(E=k[U]),M=E>>>16,m=65535&d,B=d>>>16,d=S[(U+9)%16],x+=65535&(E=k[(U+9)%16]),M+=E>>>16,m+=65535&d,B+=d>>>16,g=S[(U+1)%16],x+=65535&(E=((A=k[(U+1)%16])>>>1|g<<31)^(A>>>8|g<<24)^(A>>>7|g<<25)),M+=E>>>16,m+=65535&(d=(g>>>1|A<<31)^(g>>>8|A<<24)^g>>>7),B+=d>>>16,g=S[(U+14)%16],M+=(E=((A=k[(U+14)%16])>>>19|g<<13)^(g>>>29|A<<3)^(A>>>6|g<<26))>>>16,m+=65535&(d=(g>>>19|A<<13)^(A>>>29|g<<3)^g>>>6),B+=d>>>16,B+=(m+=(M+=(x+=65535&E)>>>16)>>>16)>>>16,S[U]=65535&m|B<<16,k[U]=65535&x|M<<16;x=65535&(E=O),M=E>>>16,m=65535&(d=K),B=d>>>16,d=r[0],M+=(E=t[0])>>>16,m+=65535&d,B+=d>>>16,B+=(m+=(M+=(x+=65535&E)>>>16)>>>16)>>>16,r[0]=K=65535&m|B<<16,t[0]=O=65535&x|M<<16,x=65535&(E=C),M=E>>>16,m=65535&(d=Y),B=d>>>16,d=r[1],M+=(E=t[1])>>>16,m+=65535&d,B+=d>>>16,B+=(m+=(M+=(x+=65535&E)>>>16)>>>16)>>>16,r[1]=Y=65535&m|B<<16,t[1]=C=65535&x|M<<16,x=65535&(E=F),M=E>>>16,m=65535&(d=L),B=d>>>16,d=r[2],M+=(E=t[2])>>>16,m+=65535&d,B+=d>>>16,B+=(m+=(M+=(x+=65535&E)>>>16)>>>16)>>>16,r[2]=L=65535&m|B<<16,t[2]=F=65535&x|M<<16,x=65535&(E=I),M=E>>>16,m=65535&(d=T),B=d>>>16,d=r[3],M+=(E=t[3])>>>16,m+=65535&d,B+=d>>>16,B+=(m+=(M+=(x+=65535&E)>>>16)>>>16)>>>16,r[3]=T=65535&m|B<<16,t[3]=I=65535&x|M<<16,x=65535&(E=Z),M=E>>>16,m=65535&(d=z),B=d>>>16,d=r[4],M+=(E=t[4])>>>16,m+=65535&d,B+=d>>>16,B+=(m+=(M+=(x+=65535&E)>>>16)>>>16)>>>16,r[4]=z=65535&m|B<<16,t[4]=Z=65535&x|M<<16,x=65535&(E=G),M=E>>>16,m=65535&(d=R),B=d>>>16,d=r[5],M+=(E=t[5])>>>16,m+=65535&d,B+=d>>>16,B+=(m+=(M+=(x+=65535&E)>>>16)>>>16)>>>16,r[5]=R=65535&m|B<<16,t[5]=G=65535&x|M<<16,x=65535&(E=q),M=E>>>16,m=65535&(d=P),B=d>>>16,d=r[6],M+=(E=t[6])>>>16,m+=65535&d,B+=d>>>16,B+=(m+=(M+=(x+=65535&E)>>>16)>>>16)>>>16,r[6]=P=65535&m|B<<16,t[6]=q=65535&x|M<<16,x=65535&(E=D),M=E>>>16,m=65535&(d=N),B=d>>>16,d=r[7],M+=(E=t[7])>>>16,m+=65535&d,B+=d>>>16,B+=(m+=(M+=(x+=65535&E)>>>16)>>>16)>>>16,r[7]=N=65535&m|B<<16,t[7]=D=65535&x|M<<16,V+=128,e-=128}return e}function W(r,t,n){var e,o=new Int32Array(8),i=new Int32Array(8),h=new Uint8Array(256),a=n;for(o[0]=1779033703,o[1]=3144134277,o[2]=1013904242,o[3]=2773480762,o[4]=1359893119,o[5]=2600822924,o[6]=528734635,o[7]=1541459225,i[0]=4089235720,i[1]=2227873595,i[2]=4271175723,i[3]=1595750129,i[4]=2917565137,i[5]=725511199,i[6]=4215389547,i[7]=327033209,Q(o,i,t,n),n%=128,e=0;e<n;e++)h[e]=t[a-n+e];for(h[n]=128,h[(n=256-128*(n<112?1:0))-9]=0,f(h,n-8,a/536870912|0,a<<3),Q(o,i,h,n),e=0;e<8;e++)f(r,8*e,o[e],i[e]);return 0}function $(r,t){var n=v(),e=v(),o=v(),i=v(),h=v(),a=v(),f=v(),s=v(),u=v();C(n,r[1],r[0]),C(u,t[1],t[0]),F(n,n,u),O(e,r[0],r[1]),O(u,t[0],t[1]),F(e,e,u),F(o,r[3],t[3]),F(o,o,y),F(i,r[2],t[2]),O(i,i,i),C(h,e,n),C(a,i,o),O(f,i,o),O(s,e,n),F(r[0],h,a),F(r[1],s,f),F(r[2],f,a),F(r[3],h,s)}function rr(r,t,n){var e;for(e=0;e<4;e++)T(r[e],t[e],n)}function tr(r,t){var n=v(),e=v(),o=v();Z(o,t[2]),F(n,t[0],o),F(e,t[1],o),z(r,e),r[31]^=P(n)<<7}function nr(r,t,n){var e,o;for(Y(r[0],s),Y(r[1],u),Y(r[2],u),Y(r[3],s),o=255;0<=o;--o)rr(r,t,e=n[o/8|0]>>(7&o)&1),$(t,r),$(r,r),rr(r,t,e)}function er(r,t){var n=[v(),v(),v(),v()];Y(n[0],e),Y(n[1],a),Y(n[2],u),F(n[3],e,a),nr(r,n,t)}function or(r,t,n){var e,o=new Uint8Array(64),i=[v(),v(),v(),v()];for(n||h(t,32),W(o,t,32),o[0]&=248,o[31]&=127,o[31]|=64,er(i,o),tr(r,i),e=0;e<32;e++)t[e+32]=r[e];return 0}var ir=new Float64Array([237,211,245,92,26,99,18,88,214,156,247,162,222,249,222,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,16]);function hr(r,t){var n,e,o,i;for(e=63;32<=e;--e){for(n=0,o=e-32,i=e-12;o<i;++o)t[o]+=n-16*t[e]*ir[o-(e-32)],n=Math.floor((t[o]+128)/256),t[o]-=256*n;t[o]+=n,t[e]=0}for(o=n=0;o<32;o++)t[o]+=n-(t[31]>>4)*ir[o],n=t[o]>>8,t[o]&=255;for(o=0;o<32;o++)t[o]-=n*ir[o];for(e=0;e<32;e++)t[e+1]+=t[e]>>8,r[e]=255&t[e]}function ar(r){var t,n=new Float64Array(64);for(t=0;t<64;t++)n[t]=r[t];for(t=0;t<64;t++)r[t]=0;hr(r,n)}function fr(r,t,n,e){var o,i,h=new Uint8Array(64),a=new Uint8Array(64),f=new Uint8Array(64),s=new Float64Array(64),u=[v(),v(),v(),v()];W(h,e,32),h[0]&=248,h[31]&=127,h[31]|=64;var c=n+64;for(o=0;o<n;o++)r[64+o]=t[o];for(o=0;o<32;o++)r[32+o]=h[32+o];for(W(f,r.subarray(32),n+32),ar(f),er(u,f),tr(r,u),o=32;o<64;o++)r[o]=e[o];for(W(a,r,n+64),ar(a),o=0;o<64;o++)s[o]=0;for(o=0;o<32;o++)s[o]=f[o];for(o=0;o<32;o++)for(i=0;i<32;i++)s[o+i]+=a[o]*h[i];return hr(r.subarray(32),s),c}function sr(r,t,n,e){var o,i=new Uint8Array(32),h=new Uint8Array(64),a=[v(),v(),v(),v()],f=[v(),v(),v(),v()];if(n<64)return-1;if(function(r,t){var n=v(),e=v(),o=v(),i=v(),h=v(),a=v(),f=v();if(Y(r[2],u),N(r[1],t),I(o,r[1]),F(i,o,c),C(o,o,r[2]),O(i,r[2],i),I(h,i),I(a,h),F(f,a,h),F(n,f,o),F(n,n,i),G(n,n),F(n,n,o),F(n,n,i),F(n,n,i),F(r[0],n,i),I(e,r[0]),F(e,e,i),R(e,o)&&F(r[0],r[0],l),I(e,r[0]),F(e,e,i),R(e,o))return 1;P(r[0])===t[31]>>7&&C(r[0],s,r[0]),F(r[3],r[0],r[1])}(f,e))return-1;for(o=0;o<n;o++)r[o]=t[o];for(o=0;o<32;o++)r[o+32]=e[o];if(W(h,r,n),ar(h),nr(a,f,h),er(f,t.subarray(32)),$(a,f),tr(i,a),n-=64,g(t,0,i,0)){for(o=0;o<n;o++)r[o]=0;return-1}for(o=0;o<n;o++)r[o]=t[o+64];return n}function ur(r,t){if(32!==r.length)throw new Error("bad key size");if(24!==t.length)throw new Error("bad nonce size")}function cr(){for(var r=0;r<arguments.length;r++)if(!(arguments[r]instanceof Uint8Array))throw new TypeError("unexpected type, use Uint8Array")}function yr(r){for(var t=0;t<r.length;t++)r[t]=0}i.lowlevel={crypto_core_hsalsa20:_,crypto_stream_xor:M,crypto_stream:x,crypto_stream_salsa20_xor:d,crypto_stream_salsa20:E,crypto_onetimeauth:B,crypto_onetimeauth_verify:S,crypto_verify_16:b,crypto_verify_32:g,crypto_secretbox:k,crypto_secretbox_open:K,crypto_scalarmult:q,crypto_scalarmult_base:D,crypto_box_beforenm:X,crypto_box_afternm:j,crypto_box:function(r,t,n,e,o,i){var h=new Uint8Array(32);return X(h,o,i),j(r,t,n,e,h)},crypto_box_open:function(r,t,n,e,o,i){var h=new Uint8Array(32);return X(h,o,i),H(r,t,n,e,h)},crypto_box_keypair:V,crypto_hash:W,crypto_sign:fr,crypto_sign_keypair:or,crypto_sign_open:sr,crypto_secretbox_KEYBYTES:32,crypto_secretbox_NONCEBYTES:24,crypto_secretbox_ZEROBYTES:32,crypto_secretbox_BOXZEROBYTES:16,crypto_scalarmult_BYTES:32,crypto_scalarmult_SCALARBYTES:32,crypto_box_PUBLICKEYBYTES:32,crypto_box_SECRETKEYBYTES:32,crypto_box_BEFORENMBYTES:32,crypto_box_NONCEBYTES:24,crypto_box_ZEROBYTES:32,crypto_box_BOXZEROBYTES:16,crypto_sign_BYTES:64,crypto_sign_PUBLICKEYBYTES:32,crypto_sign_SECRETKEYBYTES:64,crypto_sign_SEEDBYTES:32,crypto_hash_BYTES:64,gf:v,D:c,L:ir,pack25519:z,unpack25519:N,M:F,A:O,S:I,Z:C,pow2523:G,add:$,set25519:Y,modL:hr,scalarmult:nr,scalarbase:er},i.randomBytes=function(r){var t=new Uint8Array(r);return h(t,r),t},i.secretbox=function(r,t,n){cr(r,t,n),ur(n,t);for(var e=new Uint8Array(32+r.length),o=new Uint8Array(e.length),i=0;i<r.length;i++)e[i+32]=r[i];return k(o,e,e.length,t,n),o.subarray(16)},i.secretbox.open=function(r,t,n){cr(r,t,n),ur(n,t);for(var e=new Uint8Array(16+r.length),o=new Uint8Array(e.length),i=0;i<r.length;i++)e[i+16]=r[i];return e.length<32||0!==K(o,e,e.length,t,n)?null:o.subarray(32)},i.secretbox.keyLength=32,i.secretbox.nonceLength=24,i.secretbox.overheadLength=16,i.scalarMult=function(r,t){if(cr(r,t),32!==r.length)throw new Error("bad n size");if(32!==t.length)throw new Error("bad p size");var n=new Uint8Array(32);return q(n,r,t),n},i.scalarMult.base=function(r){if(cr(r),32!==r.length)throw new Error("bad n size");var t=new Uint8Array(32);return D(t,r),t},i.scalarMult.scalarLength=32,i.scalarMult.groupElementLength=32,i.box=function(r,t,n,e){var o=i.box.before(n,e);return i.secretbox(r,t,o)},i.box.before=function(r,t){cr(r,t),function(r,t){if(32!==r.length)throw new Error("bad public key size");if(32!==t.length)throw new Error("bad secret key size")}(r,t);var n=new Uint8Array(32);return X(n,r,t),n},i.box.after=i.secretbox,i.box.open=function(r,t,n,e){var o=i.box.before(n,e);return i.secretbox.open(r,t,o)},i.box.open.after=i.secretbox.open,i.box.keyPair=function(){var r=new Uint8Array(32),t=new Uint8Array(32);return V(r,t),{publicKey:r,secretKey:t}},i.box.keyPair.fromSecretKey=function(r){if(cr(r),32!==r.length)throw new Error("bad secret key size");var t=new Uint8Array(32);return D(t,r),{publicKey:t,secretKey:new Uint8Array(r)}},i.box.publicKeyLength=32,i.box.secretKeyLength=32,i.box.sharedKeyLength=32,i.box.nonceLength=24,i.box.overheadLength=i.secretbox.overheadLength,i.sign=function(r,t){if(cr(r,t),64!==t.length)throw new Error("bad secret key size");var n=new Uint8Array(64+r.length);return fr(n,r,r.length,t),n},i.sign.open=function(r,t){if(cr(r,t),32!==t.length)throw new Error("bad public key size");var n=new Uint8Array(r.length),e=sr(n,r,r.length,t);if(e<0)return null;for(var o=new Uint8Array(e),i=0;i<o.length;i++)o[i]=n[i];return o},i.sign.detached=function(r,t){for(var n=i.sign(r,t),e=new Uint8Array(64),o=0;o<e.length;o++)e[o]=n[o];return e},i.sign.detached.verify=function(r,t,n){if(cr(r,t,n),64!==t.length)throw new Error("bad signature size");if(32!==n.length)throw new Error("bad public key size");var e,o=new Uint8Array(64+r.length),i=new Uint8Array(64+r.length);for(e=0;e<64;e++)o[e]=t[e];for(e=0;e<r.length;e++)o[e+64]=r[e];return 0<=sr(i,o,o.length,n)},i.sign.keyPair=function(){var r=new Uint8Array(32),t=new Uint8Array(64);return or(r,t),{publicKey:r,secretKey:t}},i.sign.keyPair.fromSecretKey=function(r){if(cr(r),64!==r.length)throw new Error("bad secret key size");for(var t=new Uint8Array(32),n=0;n<t.length;n++)t[n]=r[32+n];return{publicKey:t,secretKey:new Uint8Array(r)}},i.sign.keyPair.fromSeed=function(r){if(cr(r),32!==r.length)throw new Error("bad seed size");for(var t=new Uint8Array(32),n=new Uint8Array(64),e=0;e<32;e++)n[e]=r[e];return or(t,n,!0),{publicKey:t,secretKey:n}},i.sign.publicKeyLength=32,i.sign.secretKeyLength=64,i.sign.seedLength=32,i.sign.signatureLength=64,i.hash=function(r){cr(r);var t=new Uint8Array(64);return W(t,r,r.length),t},i.hash.hashLength=64,i.verify=function(r,t){return cr(r,t),0!==r.length&&0!==t.length&&(r.length===t.length&&0===w(r,0,t,0,r.length))},i.setPRNG=function(r){h=r},function(){var o="undefined"!=typeof self?self.crypto||self.msCrypto:null;if(o&&o.getRandomValues){i.setPRNG(function(r,t){var n,e=new Uint8Array(t);for(n=0;n<t;n+=65536)o.getRandomValues(e.subarray(n,n+Math.min(t-n,65536)));for(n=0;n<t;n++)r[n]=e[n];yr(e)})}else"undefined"!=typeof require&&(o=require("crypto"))&&o.randomBytes&&i.setPRNG(function(r,t){var n,e=o.randomBytes(t);for(n=0;n<t;n++)r[n]=e[n];yr(e)})}()}("undefined"!=typeof module&&module.exports?module.exports:self.nacl=self.nacl||{});
+/* ---- mailparse.js ---- */
+/* Libertad Financiera · Lector de correos bancarios.
+   Se usa igual en la aplicación (navegador) y en el programa de Gmail (Apps Script).
+   No contiene datos personales: solo reconoce los formatos de cada banco.
+   parse({ from, subject, date, body, attachments }) → evento { type, amount, date, ... } */
+(function (root) {
+  'use strict';
+  var VERSION = 3;
+  var MONTHS = { enero: 1, febrero: 2, marzo: 3, abril: 4, mayo: 5, junio: 6, julio: 7, agosto: 8, septiembre: 9, setiembre: 9, octubre: 10, noviembre: 11, diciembre: 12 };
+
+  // Remitentes que se leen (también arma la búsqueda de Gmail).
+  var SENDERS = ['produbanco.com', 'bolivariano.com', 'mibankard.com', 'dinersclub.com.ec', 'titanium.com.ec', 'efacturacioninterdin.com', 'e-facturacioninterdin.com',
+    'bmachala.com', 'bcomachala.com', 'bancomachala.com', 'bancoguayaquil.com', 'netlife.info.ec', 'otecel.com.ec'];
+
+  function clean(s) {
+    return String(s || '').replace(/\r/g, '').replace(/\[\]\([^)]*\)/g, ' ').replace(/[*#]+/g, ' ').replace(/\|/g, ' | ').replace(/[ \t\u00a0]+/g, ' ');
+  }
+  function flat(s) { return clean(s).replace(/\s*\|\s*/g, ' ').replace(/\s+/g, ' ').trim(); }
+  function strip(s) { return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
+  function r2(x) { return Math.round(x * 100) / 100; }
+  // Importe: admite 1,234.56 · 1.234,56 · 11,99 · 2846.32
+  function amt(s) {
+    if (s === null || s === undefined) return null;
+    var first = String(s).match(/\d[\d.,]*/); s = first ? first[0].replace(/[.,]+$/, '') : '';
+    if (!s) return null;
+    var lc = s.lastIndexOf(','), ld = s.lastIndexOf('.');
+    if (lc >= 0 && ld >= 0) s = lc > ld ? s.replace(/\./g, '').replace(',', '.') : s.replace(/,/g, '');
+    else if (lc >= 0) s = /,\d{1,2}$/.test(s) && s.split(',').length === 2 ? s.replace(',', '.') : s.replace(/,/g, '');
+    else if (ld >= 0 && /^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, '');
+    var v = parseFloat(s);
+    return isFinite(v) ? r2(v) : null;
+  }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function ymd(y, m, d) { return y + '-' + pad(m) + '-' + pad(d); }
+  function valid(y, m, d) { return m >= 1 && m <= 12 && d >= 1 && d <= 31 && y > 2000 && y < 2100; }
+  function headerDate(iso) { var d = new Date(iso); if (isNaN(d)) return null; var l = new Date(d.getTime() - 5 * 3600000); return ymd(l.getUTCFullYear(), l.getUTCMonth() + 1, l.getUTCDate()); }
+  function dist(a, b) { return Math.abs((Date.UTC(+a.slice(0, 4), +a.slice(5, 7) - 1, +a.slice(8, 10)) - Date.UTC(+b.slice(0, 4), +b.slice(5, 7) - 1, +b.slice(8, 10))) / 86400000); }
+  // Fecha del texto; si es ambigua (día/mes), elige la más cercana a la fecha del correo.
+  function pickDate(text, mailDate) {
+    var hd = headerDate(mailDate), t = strip(text).toLowerCase(), m, cands = [];
+    if ((m = t.match(/(\d{1,2})\/([a-z]+)\/(\d{4})/)) && MONTHS[m[2]]) cands.push(ymd(+m[3], MONTHS[m[2]], +m[1]));
+    if ((m = t.match(/(\d{4})-(\d{2})-(\d{2})/)) && valid(+m[1], +m[2], +m[3])) cands.push(ymd(+m[1], +m[2], +m[3]));
+    if ((m = t.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/))) {
+      if (valid(+m[3], +m[2], +m[1])) cands.push(ymd(+m[3], +m[2], +m[1]));
+      if (valid(+m[3], +m[1], +m[2])) cands.push(ymd(+m[3], +m[1], +m[2]));
+    }
+    if (!cands.length && (m = t.match(/(\d{1,2})\/(\d{1,2})\s+\d{1,2}:\d{2}/)) && hd) {
+      var y = +hd.slice(0, 4);
+      [[y, +m[1], +m[2]], [y, +m[2], +m[1]], [y - 1, +m[1], +m[2]]].forEach(function (c) { if (valid(c[0], c[1], c[2])) cands.push(ymd(c[0], c[1], c[2])); });
+    }
+    if (!cands.length) return hd;
+    if (!hd) return cands[0];
+    cands.sort(function (a, b) { return dist(a, hd) - dist(b, hd); });
+    return dist(cands[0], hd) <= 10 ? cands[0] : hd;
+  }
+  var LABELS = /\s+(?=(?:Banco (?:Destino|Beneficiario|Origen|Contacto)|Cuenta (?:Destino|Beneficiario|D[eé]bito)|Tarjeta (?:Contacto|Destino)|Monto|Valor|Descripci[oó]n|Canal|Referencia|Beneficiario|Enviada por|Establecimiento|Contacto|Titular|Lugar|Fecha(?: Hora)?|Identificaci[oó]n|Pa[ií]s|N[uú]mero de (?:Tarjeta|Autorizaci[oó]n)|Nombre Tarjeta Habiente|Concepto|Documento|Esta transacci[oó]n|Si no realiz)\b\s*:?)/i;
+  function field(text, label) {
+    var re = new RegExp('(?:^|[^A-Za-zÁÉÍÓÚÑáéíóúñ])' + label + '\\s*:?[\\s|]*([^\\n|]+)', 'i');
+    var m = text.match(re); if (!m) return null;
+    // En los correos de una sola línea, el valor termina donde empieza la siguiente etiqueta ("Banco Destino:").
+    return m[1].replace(/\s+/g, ' ').split(LABELS)[0].trim();
+  }
+  function digits(s, n) { var d = String(s || '').replace(/\D/g, ''); return d ? d.slice(-(n || 4)) : null; }
+  function fee(text) { var m = text.match(/costo de \$?\s*([\d.,]+)/i); return m ? amt(m[1]) : 0; }
+  function senderOf(from) { var m = String(from || '').match(/[\w.+-]+@([\w.-]+)/); return m ? m[1].toLowerCase() : String(from || '').toLowerCase(); }
+  function ev(type, o) { o.type = type; return o; }
+
+  var RULES = [];
+  function rule(test, fn) { RULES.push({ test: test, fn: fn }); }
+
+  // ---------------- Produbanco ----------------
+  function isP(c) { return /produbanco/.test(c.dom); }
+  rule(function (c) { return isP(c) && /Ingreso App|Creaci[oó]n de Contacto|Modificaci[oó]n de Contacto|Recordatorio|Mant[eé]n tu FlexiAhorro|clave|Bloqueo|Actualizaci[oó]n de datos/i.test(c.subject + ' ' + c.flat.slice(0, 260)) && !/Transacci[oó]n:\s*(Transferencia|Pago|Consumo)/i.test(c.flat); }, function () { return ev('ignore', {}); });
+  rule(function (c) { return isP(c) && /Pago de tarjeta recibido/i.test(c.subject + c.flat); }, function (c) {
+    return ev('duplicate_notice', { ref: field(c.text, 'Referencia'), amount: amt(field(c.text, 'Monto')) });
+  });
+  rule(function (c) { return isP(c) && /Pago de Tarjeta Enviad/i.test(c.flat); }, function (c) {
+    var f = c.flat;
+    return ev('card_payment', { amount: amt((f.match(/Monto:\s*\$?\s*([\d.,]+)/i) || [])[1]), fee: fee(f), date: c.date, bank: ((f.match(/Banco Contacto:\s*(.+?)\s+Tarjeta Contacto/i) || [])[1] || '').trim(),
+      card: digits((f.match(/Tarjeta Contacto:\s*(\S+)/i) || [])[1]), counterparty: ((f.match(/Contacto:\s*(.+?)\s+Banco Contacto/i) || [])[1] || '').trim(), desc: ((f.match(/Descripci[oó]n:\s*(.+?)\s+Canal/i) || [])[1] || '').trim(), ref: (f.match(/Referencia:\s*(\d+)/i) || [])[1] || null, bankFrom: 'Produbanco' });
+  });
+  rule(function (c) { return isP(c) && /Transferencia Enviada Exitosamente/i.test(c.flat); }, function (c) {
+    var t = c.text;
+    return ev('transfer_out', { amount: amt(field(t, 'Monto')), fee: fee(c.flat), date: c.date, counterparty: field(t, 'Contacto'), bank: field(t, 'Banco Destino'), toAccount: digits(field(t, 'Cuenta Destino'), 5), desc: field(t, 'Descripci[oó]n'), ref: field(t, 'Referencia'), bankFrom: 'Produbanco' });
+  });
+  rule(function (c) { return isP(c) && /Transferencia Acreditada/i.test(c.flat); }, function (c) {
+    var t = c.text;
+    return ev('transfer_out', { amount: amt(field(t, 'Monto')), fee: fee(c.flat), date: c.date, counterparty: field(t, 'Beneficiario'), bank: field(t, 'Banco Beneficiario'), toAccount: digits(field(t, 'Cuenta Beneficiario'), 5), desc: field(t, 'Descripci[oó]n'), ref: field(t, 'Referencia'), bankFrom: 'Produbanco' });
+  });
+  rule(function (c) { return isP(c) && /Transferencia Recibida/i.test(c.flat); }, function (c) {
+    var t = c.text;
+    return ev('transfer_in', { amount: amt(field(t, 'Monto')), date: c.date, counterparty: field(t, 'Enviada por'), bank: field(t, 'Banco Origen'), toAccount: digits(field(t, 'Cuenta Beneficiario'), 5), desc: field(t, 'Descripci[oó]n'), ref: field(t, 'Referencia'), bankTo: 'Produbanco' });
+  });
+  rule(function (c) { return isP(c) && /transferencia de tu cuenta .+ a tu cuenta/i.test(c.flat); }, function (c) {
+    var m = c.flat.match(/de tu cuenta (.+?) X*(\d+) a tu cuenta (.+?) X*(\d+) por un valor de USD\s*([\d.,]+)/i) || [];
+    return ev('own_transfer', { amount: amt(m[5]), date: c.date, fromAccount: digits(m[2], 5), toAccount: digits(m[4], 5), bankFrom: 'Produbanco', bankTo: 'Produbanco' });
+  });
+  rule(function (c) { return isP(c) && /Consumo Tarjeta de D[eé]bito/i.test(c.flat); }, function (c) {
+    var t = c.text;
+    return ev('debit_purchase', { amount: amt(field(t, 'Valor')), date: c.date, merchant: field(t, 'Establecimiento'), fromAccount: digits(field(t, 'Cuenta D[eé]bito'), 5), bankFrom: 'Produbanco' });
+  });
+  rule(function (c) { return isP(c) && /retiro de tu FlexiAhorro/i.test(c.flat); }, function (c) {
+    var m = c.flat.match(/monto de USD\s*([\d.,]+) fue acreditado en tu cuenta X*(\d+)/i) || [];
+    return ev('savings_out', { amount: amt(m[1]), date: c.date, toAccount: digits(m[2], 5), product: 'FlexiAhorro' });
+  });
+  rule(function (c) { return isP(c) && /FlexiAhorro/i.test(c.flat) && /(aporte|dep[oó]sito).{0,80}(realizad|acreditad|exitos)/i.test(c.flat) && !/se realizar[aá]/i.test(c.flat); }, function (c) {
+    var m = c.flat.match(/USD\s*([\d.,]+)/i) || [];
+    return ev('savings_in', { amount: amt(m[1]), date: c.date, product: 'FlexiAhorro' });
+  });
+  rule(function (c) { return isP(c) && /Acreditaci[oó]n de intereses/i.test(c.flat); }, function (c) {
+    return ev('savings_interest', { amount: amt((c.flat.match(/Ganaste:\s*USD\s*([\d.,]+)/i) || [])[1]), date: c.date, product: 'FlexiAhorro' });
+  });
+
+  // ---------------- Bankard / Banco Bolivariano ----------------
+  function isB(c) { return /bolivariano|mibankard/.test(c.dom); }
+  rule(function (c) { return isB(c) && /CONSUMO/i.test(c.subject) && /USD en /i.test(c.flat); }, function (c) {
+    var m = c.flat.match(/([\d.,]+)\s*USD en (.+?)\s*\*{0,}\s*(?:\*{4}\s*){0,3}\*?(\d{3,4})\s+Identificaci/i) || c.flat.match(/([\d.,]+)\s*USD en (.+?)\s+\*+.*?(\d{3,4})\b/i) || [];
+    var merch = (m[2] || '').replace(/[\s*]+$/, '').trim();
+    var mm = c.raw.match(/USD en (.+?)\s\*{4}/); if (mm) merch = mm[1].trim();
+    return ev('card_purchase', { amount: amt(m[1]), date: c.date, merchant: merch, card: m[3] || null, institution: 'Bankard', holder: field(c.text, 'Titular'), place: field(c.text, 'Lugar'), online: /INTERNET/i.test(c.subject) });
+  });
+  rule(function (c) { return isB(c) && /agradece el pago|Agradecemos el pago/i.test(c.subject + c.flat); }, function (c) {
+    var f = c.flat, m = f.match(/por el valor de:?\s*.*?([\d.,]+)\s*USD\s*Fecha de Pago:\s*(\d{1,2}\/\d{1,2}\/\d{4})/i) || [];
+    var d = m[2] ? m[2].split('/') : null;
+    return ev('card_payment_received', { amount: amt(m[1]), date: d ? ymd(+d[2], +d[1], +d[0]) : c.date, institution: 'Bankard', balanceAfter: amt((f.match(/Saldo pago de contado\s*([\d.,]+)/i) || [])[1]) });
+  });
+  rule(function (c) { return /mibankard/.test(c.dom) && c.pdfs.length; }, function (c) { return ev('statement', { institution: 'Bankard', date: c.date }); });
+
+  // ---------------- Diners Club / Titanium ----------------
+  function isD(c) { return /dinersclub|titanium|interdin/.test(c.dom); }
+  rule(function (c) { return isD(c) && /Realizaste una compra/i.test(c.flat); }, function (c) {
+    var f = c.flat;
+    var inst = /titanium/.test(c.dom) || /TITANIUM/i.test((f.match(/compra con tu (.{0,30})/i) || [])[1] || '') ? 'Titanium' : /DISCOVER/i.test(f.slice(0, 300)) ? 'Discover' : 'Diners';
+    return ev('card_purchase', { amount: amt((f.match(/Valor\s*([\d.,]+)/i) || [])[1]), date: c.date, merchant: ((f.match(/Establecimiento\s*(.+?)\s+Valor/i) || [])[1] || '').trim(), card: (f.match(/terminada en\s*(\d{3,4})/i) || [])[1] || null, institution: inst, holder: ((f.match(/Hola,\s*(.+?)!/i) || [])[1] || '').trim() });
+  });
+  rule(function (c) { return isD(c) && /estado de cuenta/i.test(c.subject) && c.pdfs.length; }, function (c) { return ev('statement', { institution: /titanium/i.test(c.subject) ? 'Titanium' : 'Diners', date: c.date }); });
+
+  // ---------------- Banco de Machala ----------------
+  function isM(c) { return /bmachala|bcomachala|bancomachala/.test(c.dom); }
+  rule(function (c) { return isM(c) && /no fue procesad/i.test(c.flat); }, function () { return ev('ignore', { reason: 'no procesada' }); });
+  rule(function (c) { return isM(c) && /se ha realizado un CONSUMO/i.test(c.flat); }, function (c) {
+    var t = c.text;
+    return ev('card_purchase', { amount: amt(field(t, 'Monto')), date: c.date, merchant: field(t, 'Nombre del establecimiento'), card: digits(field(t, 'N[uú]mero de Tarjeta')), institution: 'Banco de Machala', holder: field(t, 'Nombre Tarjeta Habiente'), ref: field(t, 'N[uú]mero de Autorizaci[oó]n'), online: /INTERNET|EXTERIOR|INTERNACIONAL/i.test(c.flat.slice(0, 200)) });
+  });
+  rule(function (c) { return isM(c) && /estado de cuenta/i.test(c.subject) && c.pdfs.length; }, function (c) { return ev('statement', { institution: 'Banco de Machala', date: c.date }); });
+
+  // ---------------- Banco Guayaquil ----------------
+  function isG(c) { return /bancoguayaquil/.test(c.dom); }
+  rule(function (c) { return isG(c) && /Pago de Pr[eé]stamo/i.test(c.flat); }, function (c) {
+    var t = c.text, f = c.flat;
+    return ev('loan_payment', { amount: amt(field(t, 'Total pagado')), capital: amt(field(t, 'Capital pagado')), interest: amt(field(t, 'Inter[eé]s pagado')), date: c.date, loan: digits(field(t, 'Documento')), product: field(t, 'Concepto'), installments: +(field(t, 'Cantidad de cuotas pagadas') || 1), ref: (f.match(/Comprobante No\.?\s*(\d+)/i) || [])[1] || null, institution: 'Banco Guayaquil' });
+  });
+  rule(function (c) { return isG(c) && /Comprobante de Transferencia/i.test(c.flat); }, function (c) {
+    var f = c.flat;
+    var a = f.match(/Datos del Ordenante.*?Titular Cuenta:\s*(.+?)\s+No\. de Cuenta:\s*(\S+).*?Datos del Beneficiario.*?Titular Cuenta:\s*(.+?)\s+No\. de Cuenta:\s*(\S+)/i) || [];
+    var bank = (f.match(/Banco (?:Destino|Beneficiario):\s*(.+?)\s+(?:No\.|Tipo|Valor)/i) || [])[1];
+    return ev('bg_transfer', { amount: amt((f.match(/Valor Transferido:\s*\$?\s*([\d.,]+)/i) || [])[1]), date: c.date, fromName: (a[1] || '').trim(), fromAccount: digits(a[2]), toName: (a[3] || '').trim(), toAccount: digits(a[4]), desc: ((f.match(/Concepto:\s*(.+?)\s+(?:IP:|Banca)/i) || [])[1] || '').trim(), ref: (f.match(/Comprobante No\.?\s*(\d+)/i) || [])[1] || null, bank: bank || 'Banco Guayaquil' });
+  });
+  rule(function (c) { return isG(c) && !/comprobante|pago|d[eé]bito|transferencia recibida/i.test(c.flat.slice(0, 300)); }, function () { return ev('ignore', {}); });
+
+  // ---------------- Servicios ----------------
+  rule(function (c) { return /netlife/.test(c.dom) && /d[eé]bito ha sido realizado/i.test(c.flat); }, function (c) {
+    return ev('bill', { amount: amt((c.flat.match(/\$\s*([\d.,]+)/) || [])[1]), date: c.date, service: 'internet', provider: 'Netlife', paid: true });
+  });
+  rule(function (c) { return /netlife/.test(c.dom); }, function () { return ev('ignore', {}); });
+  rule(function (c) { return /otecel/.test(c.dom) && /Total a Pagar/i.test(c.flat); }, function (c) {
+    return ev('bill', { amount: amt((c.flat.match(/Total a Pagar\s*\$?\s*([\d.,]+)/i) || [])[1]), date: c.date, service: 'celular', provider: 'Tigo', paid: false });
+  });
+
+  rule(function (c) { return /paypal/.test(c.dom); }, function () { return ev('ignore', { reason: 'el cargo llega por la tarjeta' }); });
+
+  // Estados de cuenta en PDF de cualquier banco conocido
+  rule(function (c) { return c.pdfs.length && /estado de cuenta/i.test(c.subject + ' ' + c.flat.slice(0, 400)); }, function (c) { return ev('statement', { institution: '', date: c.date }); });
+
+  function parse(msg) {
+    var raw = String(msg.body || ''), text = clean(raw), c = {
+      raw: raw, text: text, flat: flat(raw), subject: String(msg.subject || ''), from: String(msg.from || ''), dom: senderOf(msg.from),
+      pdfs: (msg.attachments || []).filter(function (a) { return /\.pdf$/i.test(typeof a === 'string' ? a : a.name || ''); })
+    };
+    c.date = pickDate(c.flat, msg.date);
+    var out = null;
+    for (var i = 0; i < RULES.length && !out; i++) {
+      try { if (RULES[i].test(c)) out = RULES[i].fn(c); } catch (e) { out = null; }
+    }
+    if (!out) {
+      // Desconocido: solo interesa si parece una transacción con un importe.
+      var a = c.flat.match(/(?:USD|\$)\s*([\d.,]*\d)/i);
+      var tx = /transacci[oó]n|consumo|pago|transferencia|d[eé]bito|cr[eé]dito|comprobante|retiro|dep[oó]sito/i.test(c.subject + ' ' + c.flat.slice(0, 400));
+      var promo = /promoci|gana |sorteo|participa|descuento|beneficio|oferta|t[eé]rminos y condiciones aplican|aplican t[eé]rminos/i.test(c.subject + ' ' + c.flat.slice(0, 300));
+      out = a && tx && !promo ? ev('unknown', { amount: amt(a[1]), date: c.date, excerpt: c.flat.slice(0, 400) }) : ev('ignore', {});
+    }
+    if (out.type !== 'ignore' && out.type !== 'unknown' && out.type !== 'statement' && !(out.amount > 0)) out = ev('unknown', { amount: out.amount || null, date: c.date, excerpt: c.flat.slice(0, 400), partial: out.type });
+    out.date = out.date || c.date;
+    out.v = VERSION;
+    return out;
+  }
+  // Gmail: búsqueda de los remitentes conocidos (más los que agregue el usuario).
+  function gmailQuery(extra) { return '{' + SENDERS.concat(extra || []).map(function (d) { return 'from:' + d; }).join(' ') + '} -in:sent -in:chats'; }
+
+  var API = { VERSION: VERSION, SENDERS: SENDERS, parse: parse, gmailQuery: gmailQuery, amt: amt, pickDate: pickDate, flat: flat };
+  if (typeof module !== 'undefined' && module.exports) module.exports = API;
+  if (root) { root.FX = root.FX || {}; root.FX.MailParse = API; root.MailParse = API; }
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
 /* ---- pdftext.js ---- */
 /* Reconstrucción de líneas de texto a partir de los elementos que entrega pdf.js.
    Se usa igual en el navegador y en las pruebas de Node. */
@@ -1923,6 +2142,21 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
       };
       state.movements.push(mv); st.movementIds.push(mv.id);
     });
+    // Consumos que ya habían llegado por aviso de correo: el estado de cuenta manda; se conserva la categoría elegida.
+    var mailMovs = state.movements.filter(function (m) { return m.accountId === acc.id && m.source === 'correo' && m.kind === 'consumo' && m.direction !== 'abono'; });
+    if (mailMovs.length) {
+      var used = {};
+      st.movementIds.forEach(function (id) {
+        var mv = state.movements.find(function (x) { return x.id === id; });
+        if (!mv || mv.direction === 'abono') return;
+        var hit = mailMovs.find(function (a) { return !used[a.id] && Math.abs(a.amount - mv.amount) < 0.005 && Math.abs(C.daysBetween(a.date, mv.date)) <= 4; });
+        if (!hit) return;
+        used[hit.id] = true;
+        if (!hit.review && (mv.review || hit.edited)) { mv.category = hit.category; mv.review = false; }
+        if (!mv.holder && hit.holder) mv.holder = hit.holder;
+      });
+      if (Object.keys(used).length) state.movements = state.movements.filter(function (m) { return !used[m.id]; });
+    }
     var stDate = doc.cutDate || doc.docDate || C.todayISO();
     var seenKeys = {};
     (sel.debts || []).forEach(function (p) {
@@ -2904,7 +3138,7 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
   };
 
   // Acciones de importación
-  App.actions.impDiscard = function (el) { var i = imports.indexOf(impById(el.dataset.imp)); if (i >= 0) imports.splice(i, 1); App.render(); };
+  App.actions.impDiscard = function (el) { var imp = impById(el.dataset.imp), i = imports.indexOf(imp); if (i >= 0) imports.splice(i, 1); if (imp && imp.inboxId && App.onImportDone) App.onImportDone(imp, 'descartado'); App.render(); };
   App.actions.impField = function (el) {
     var imp = impById(el.dataset.imp), k = el.dataset.k, f = imp.doc.f[k];
     var v = el.type === 'date' ? el.value : C.parseAmount(el.value);
@@ -2925,8 +3159,9 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
   App.actions.impMovCat = function (el) { var m = impById(el.dataset.imp).movs[+el.dataset.i]; m.category = el.value; m.review = false; m.edited = true; };
   App.actions.impMovKind = function (el) { var m = impById(el.dataset.imp).movs[+el.dataset.i]; m.kind = el.value; m.review = false; m.edited = true; };
   App.actions.impReplace = function (el) { impById(el.dataset.imp).replace = el.checked; };
-  App.actions.impConfirm = function (el) {
-    var imp = impById(el.dataset.imp), doc = imp.doc;
+  App.actions.impConfirm = function (el) { var r = confirmImp(impById(el.dataset.imp)); App.toast(r.text, 'ok'); App.render(); };
+  function confirmImp(imp) {
+    var doc = imp.doc;
     var props = S.debtProposals(doc).map(function (p) { p.include = imp.debtInclude[p.key] !== false; return p; });
     (imp.edits || []).forEach(function (k) { props.forEach(function (p) { if (doc.f[k] && doc.f[k].src === 'manual') { if (k === 'totalDue' && p.kind === 'rotativo') p.balanceSrc = 'manual'; if (k === 'rateNominal') p.rateSrc = 'manual'; } }); });
     if (doc.docType === 'tarjeta' && !props.length) { App.toast('Faltan datos para crear la deuda de esta tarjeta; se importarán solo los movimientos.', 'bad'); }
@@ -2941,9 +3176,25 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
         });
       }
     }, { noRender: true });
-    imports.splice(imports.indexOf(imp), 1);
-    App.toast('Importado: ' + res.statement.movementIds.length + ' movimientos y ' + res.statement.debtIds.length + ' deudas actualizadas.', 'ok');
-    App.render();
+    var at = imports.indexOf(imp); if (at >= 0) imports.splice(at, 1);
+    if (imp.inboxId && App.onImportDone) App.onImportDone(imp, 'importado');
+    return { status: 'imported', text: 'Importado ' + (res.account.alias || doc.fileName) + ': ' + res.statement.movementIds.length + ' movimientos y ' + res.statement.debtIds.length + ' deudas actualizadas.' };
+  }
+  // Estados de cuenta que llegan por correo: se importan solos si se leyeron bien, cuadran y no estaban ya importados.
+  App.importPdfBytes = async function (name, bytes, opts) {
+    opts = opts || {};
+    var imp = { id: C.uid('imp'), fileName: name, size: bytes.length, status: 'procesando', open: true, inboxId: opts.inboxId || null, fromMail: true };
+    try {
+      var file = new File([bytes], name, { type: 'application/pdf' });
+      var doc = P.parseLines(await pdfToLines(file), { fileName: name });
+      if (!doc.ok) return { status: 'error', text: 'No se pudo leer ' + name + ': ' + doc.warnings.join(' ') };
+      prepareDoc(imp, doc);
+      if (imp.dupStatement) return { status: 'duplicate', text: name + ': este estado de cuenta ya estaba importado.' };
+      var bad = doc.checks.some(function (k) { return !k.ok; }) || doc.parser === 'generico' || !(doc.docType === 'tarjeta' || doc.docType === 'prestamo');
+      if (opts.auto && !bad) { var r = confirmImp(imp); r.text = 'Estado de cuenta: ' + r.text; return r; }
+      imports.unshift(imp);
+      return { status: 'review', text: 'Estado de cuenta ' + name + ' llegó por correo y necesita revisión en Importar.' };
+    } catch (e) { return { status: 'error', text: 'No se pudo importar ' + name + ': ' + (e.message || e) }; }
   };
   App.actions.delStatement = async function (el) {
     var s = App.state.statements.find(function (x) { return x.id === el.dataset.id; });
@@ -3979,7 +4230,7 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
     household_exists: 'El hogar ya fue creado. Pide al administrador un código de invitación.', owner_only: 'Solo el administrador del hogar puede hacer esto.',
     too_many_invites: 'Ya hay 5 invitaciones activas. Anula las pendientes antes de crear otra.', cannot_remove_owner: 'El administrador no puede retirarse a sí mismo.',
     invalid_code: 'El código no es válido, ya se usó o venció.', too_many_attempts: 'Demasiados intentos fallidos. Espera una hora e inténtalo de nuevo.', already_member: 'Tu cuenta ya pertenece al hogar.',
-    conflict: 'Alguien guardó cambios al mismo tiempo.', invalid_action: 'Acción no válida.'
+    conflict: 'Alguien guardó cambios al mismo tiempo.', invalid_action: 'Acción no válida.', inbox_not_empty: 'Hay avisos del correo sin procesar: ábrelos primero (Revisar ahora) antes de cambiar las claves.', inbox_not_enabled: 'Primero activa la automatización por correo.', too_many_tokens: 'Ya hay 5 buzones conectados. Desconecta uno antes de agregar otro.'
   };
   function friendly(msg) {
     msg = String(msg || '');
@@ -4237,6 +4488,7 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
     if (!started) { started = true; await App.init(); } else { await App.loadProfile('real'); }
     rpc('log_event', { p_action: 'ingreso' }).catch(function () { });
     startWatchers();
+    if (FX.Mail) FX.Mail.start();
     if (App.toastLater) { App.toast(App.toastLater, 'ok'); App.toastLater = null; }
   }
 
@@ -4362,7 +4614,7 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
   App.actions.resetDo = function (el, ev) { if (Cloud.role !== 'owner' && App.profile === 'real') return App.toast('Solo el administrador del hogar puede borrar todos los datos.', 'bad'); return baseResetDo(el, ev); };
 
   // ------------------------------------------------------------------ vista: Usuarios y seguridad
-  var ACTION_LABEL = { crear_hogar: 'Creó el hogar', crear_invitacion: 'Generó una invitación', unirse: 'Se unió al hogar', guardar: 'Guardó cambios', ingreso: 'Ingresó', salida: 'Salió', respaldo: 'Descargó un respaldo', restaurar: 'Restauró un respaldo', importar: 'Importó documentos', cerrar_mes: 'Cerró un mes', retirar_miembro: 'Retiró a un miembro', anular_invitaciones: 'Anuló invitaciones', cambiar_clave_hogar: 'Cambió la clave del hogar' };
+  var ACTION_LABEL = { crear_hogar: 'Creó el hogar', crear_invitacion: 'Generó una invitación', unirse: 'Se unió al hogar', guardar: 'Guardó cambios', ingreso: 'Ingresó', salida: 'Salió', respaldo: 'Descargó un respaldo', restaurar: 'Restauró un respaldo', importar: 'Importó documentos', cerrar_mes: 'Cerró un mes', retirar_miembro: 'Retiró a un miembro', anular_invitaciones: 'Anuló invitaciones', cambiar_clave_hogar: 'Cambió la clave del hogar', activar_correo: 'Activó la automatización por correo', crear_token_correo: 'Conectó un Gmail', anular_token_correo: 'Desconectó un Gmail', procesar_correo: 'Registró avisos del correo' };
   function fmtDT(iso) { if (!iso) return '—'; var d = new Date(iso); return d.toLocaleDateString('es-EC', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' + d.toLocaleTimeString('es-EC', { hour: '2-digit', minute: '2-digit' }); }
   async function loadSec(force) {
     if (!force && Cloud.sec.loading) return;
@@ -4463,6 +4715,621 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
       if (/access_token=|error=|error_description=|type=/.test(location.hash)) history.replaceState(null, '', location.pathname + location.search);
       await next();
     } catch (e) { console.error(e); showError(friendly(e.message || String(e))); }
+  };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* ---- mail.js ---- */
+/* Libertad Financiera · Automatización por correo (Gmail → app)
+   - El programa de Gmail cifra cada aviso bancario con la clave PÚBLICA del hogar (X25519 + XSalsa20-Poly1305).
+   - Solo la app, con la clave privada guardada dentro de los datos cifrados del hogar, puede abrirlos.
+   - Lo claro se registra solo; lo dudoso queda en "Pendientes" para que lo decida cualquiera de los dos. */
+(function (G) {
+  'use strict';
+  var FX = G.FX, C = FX.Core, S = FX.Store, E = FX.Engine, MP = FX.MailParse, App = G.App, Cloud = FX.Cloud, nacl = G.nacl, esc = C.esc, r2 = C.round2;
+  var money = function (x) { return C.fmtMoney(x); };
+  var MAGIC = [0x4c, 0x46, 0x4d, 0x01]; // "LFM" v1
+  var Mail = FX.Mail = { busy: false, lastSync: 0, tokens: null, enabled: null, inboxCount: 0, waitStmt: {}, error: null };
+
+  // ------------------------------------------------------------------ cifrado
+  var b64 = function (u8) { return Cloud.crypto.b64(u8); }, unb64 = function (s) { return Cloud.crypto.unb64(s); };
+  async function gunzip(u8) {
+    if (!(u8[0] === 0x1f && u8[1] === 0x8b)) return u8;
+    return new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer());
+  }
+  function openSealed(ctB64, skB64) {
+    var all = unb64(ctB64);
+    for (var i = 0; i < 4; i++) if (all[i] !== MAGIC[i]) throw new Error('formato desconocido');
+    var epk = all.subarray(4, 36), nonce = all.subarray(36, 60), box = all.subarray(60);
+    var pt = nacl.box.open(box, nonce, epk, unb64(skB64));
+    if (!pt) throw new Error('no se pudo descifrar (¿clave cambiada?)');
+    return pt;
+  }
+  // Para pruebas: mismo formato que usa el programa de Gmail.
+  function seal(bytes, pkB64) {
+    var eph = nacl.box.keyPair(), nonce = nacl.randomBytes(24), box = nacl.box(bytes, nonce, unb64(pkB64), eph.secretKey);
+    var out = new Uint8Array(4 + 32 + 24 + box.length); out.set(MAGIC, 0); out.set(eph.publicKey, 4); out.set(nonce, 36); out.set(box, 60);
+    return b64(out);
+  }
+  function secretSeal(obj, keyB64) {
+    var nonce = nacl.randomBytes(24), box = nacl.secretbox(new TextEncoder().encode(JSON.stringify(obj)), nonce, unb64(keyB64));
+    var out = new Uint8Array(24 + box.length); out.set(nonce, 0); out.set(box, 24); return b64(out);
+  }
+  Mail.crypto = { seal: seal, openSealed: openSealed, secretSeal: secretSeal, gunzip: gunzip };
+
+  // ------------------------------------------------------------------ estado
+  function M(st) {
+    var m = st.mail = st.mail || {};
+    m.sources = m.sources || {}; m.own = m.own || {}; m.contacts = m.contacts || {}; m.cardMap = m.cardMap || {};
+    m.pending = m.pending || []; m.seen = m.seen || {}; m.log = m.log || [];
+    m.cfg = Object.assign({ employer: '', salaryFromDay: 25, salaryIncomeId: '', trackSavings: true }, m.cfg || {});
+    return m;
+  }
+  Mail.M = M;
+  function norm(s) { return C.stripAccents(String(s || '')).toUpperCase().replace(/[^A-Z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim(); }
+  function suf(s) { var d = String(s || '').replace(/\D/g, ''); return d ? d.slice(-4) : ''; }
+  function fpOf(ev) { return C.hash([ev.type, (+ev.amount || 0).toFixed(2), ev.date, ev.ref || '', norm(ev.merchant || ev.counterparty || ev.fromName || ''), ev.card || ev.loan || ev.toAccount || ''].join('|')); }
+  function log(m, text, ev, meta, status) {
+    m.log.unshift({ at: new Date().toISOString(), date: ev && ev.date, who: meta && meta.person || '', text: text, status: status || 'ok' });
+    if (m.log.length > 300) m.log.length = 300;
+  }
+  function personOf(m, label) { var s = m.sources[label]; return s && s.person ? s.person : (label || '').replace(/^Gmail( de)?\s*/i, '') || 'Hogar'; }
+  function daysApart(a, b) { return Math.abs(C.daysBetween(a, b)); }
+
+  // ------------------------------------------------------------------ cuentas
+  var INST = [['Banco de Machala', /MACHALA/i], ['Bankard', /BANKARD|BOLIVARIANO/i], ['Titanium', /TITANIUM/i], ['Diners', /DINERS|INTERDIN/i], ['Discover', /DISCOVER/i], ['Banco Guayaquil', /GUAYAQUIL/i], ['Produbanco', /PRODUBANCO|PROMERICA/i], ['Banco Pichincha', /PICHINCHA/i]];
+  function instKey(name) { for (var i = 0; i < INST.length; i++) if (INST[i][1].test(name || '')) return INST[i][0]; return name || ''; }
+  function cardCandidates(st, inst) {
+    var re = /Titanium|Diners|Discover/.test(inst) ? /DINERS/i : (INST.find(function (x) { return x[0] === inst; }) || [0, new RegExp(inst.replace(/[^\w ]/g, ''), 'i')])[1];
+    var list = st.accounts.filter(function (a) { return a.type === 'tarjeta' && re.test(a.institution + ' ' + (a.product || '')); });
+    if (inst === 'Titanium') list = list.filter(function (a) { return /TITANIUM/i.test(a.product || ''); });
+    else if (inst === 'Diners') list = list.filter(function (a) { return !/TITANIUM|DISCOVER/i.test(a.product || ''); });
+    else if (inst === 'Discover') list = list.filter(function (a) { return /DISCOVER/i.test(a.product || ''); });
+    return list;
+  }
+  // Tarjeta del aviso → cuenta registrada (por los últimos dígitos; si es otra tarjeta del mismo producto, es una adicional).
+  function cardAccount(st, inst, digits) {
+    var m = M(st), mapped = m.cardMap[inst + '|' + digits];
+    if (mapped) { var a0 = App.accById(mapped); if (a0) return { acc: a0, principal: false }; }
+    var all = digits ? st.accounts.filter(function (a) { return a.type === 'tarjeta' && String(a.last4 || '').slice(-digits.length) === digits; }) : [];
+    var cands = cardCandidates(st, inst);
+    var exact = cands.find(function (a) { return all.indexOf(a) >= 0; }) || (all.length === 1 && !cands.length ? all[0] : null);
+    if (exact) return { acc: exact, principal: true };
+    if (cands.length === 1) return { acc: cands[0], principal: false };
+    return null;
+  }
+  function bankAccount(st, bank, suffix, person) {
+    bank = instKey(bank) || 'Banco'; var s4 = suf(suffix);
+    var acc = st.accounts.find(function (a) { return a.type === 'cuenta' && instKey(a.institution) === bank && (s4 ? suf(a.operation || a.last4) === s4 : (a.holderName === person && !a.last4)); });
+    if (!acc && !s4) acc = st.accounts.find(function (a) { return a.type === 'cuenta' && instKey(a.institution) === bank && a.holderName === person; });
+    if (!acc) {
+      acc = { id: C.uid('acc'), key: bank + '|' + (s4 || person || 'cuenta'), institution: bank, product: 'Cuenta', last4: s4, operation: suffix || '', type: 'cuenta', holderName: person || '', alias: bank + (s4 ? ' cta. ·' + s4 : ' (' + (person || 'cuenta') + ')'), source: 'correo' };
+      st.accounts.push(acc);
+    }
+    if (s4) { var m = M(st); if (!m.own[s4]) m.own[s4] = { person: person || acc.holderName || '', bank: bank }; }
+    return acc;
+  }
+  function loanAccount(st, loanDigits, inst) {
+    var loans = st.accounts.filter(function (a) { return a.type === 'prestamo' && (!inst || instKey(a.institution) === instKey(inst)); });
+    var d = String(loanDigits || '').replace(/^0+/, '');
+    return loans.find(function (a) { var op = String(a.operation || a.last4 || '').replace(/^0+/, ''); return d && op && (op.slice(-4) === d.slice(-4)); }) || (loans.length === 1 ? loans[0] : null);
+  }
+
+  // ------------------------------------------------------------------ registros
+  function addMov(st, o) {
+    var acc = App.accById(o.accountId);
+    var mv = { id: C.uid('mv'), accountId: o.accountId, statementId: null, date: o.date, ref: o.ref || '', desc: o.desc, merchant: o.merchant || C.normalizeMerchant(o.desc), amount: r2(o.amount), direction: o.direction || 'cargo',
+      opType: '', kind: o.kind, category: o.category, review: !!o.review, holder: o.holder || null, card: o.card || null, installment: null, source: 'correo', period: C.monthKey(o.date), edited: false, notes: o.note || '', mailFp: o.fp };
+    mv.hash = S.movementHash(acc ? acc.key : '', mv);
+    st.movements.push(mv); return mv;
+  }
+  function addFee(st, accId, ev, fp, holder) {
+    if (!(ev.fee > 0)) return;
+    addMov(st, { accountId: accId, date: ev.date, desc: 'Costo de transferencia interbancaria', amount: ev.fee, kind: 'cargo', category: 'Comisiones bancarias e intereses', fp: fp + ':fee', holder: holder });
+  }
+  // Mes del plan al que pertenece un pago: el vencimiento más cercano a la fecha del pago.
+  function planMonthFor(st, accId, date) {
+    var acc = App.accById(accId) || {}, debt = st.debts.find(function (d) { return d.accountId === accId; }) || {};
+    var day = acc.dueDay || debt.dueDay || 5, base = C.monthKey(date), best = base, bd = 99;
+    [-1, 0, 1].forEach(function (k) {
+      var mk = C.addMonths(base, k), y = +mk.slice(0, 4), mo = +mk.slice(5, 7), last = new Date(Date.UTC(y, mo, 0)).getUTCDate();
+      var due = mk + '-' + ('0' + Math.min(day, last)).slice(-2), dd = daysApart(due, date);
+      if (dd < bd) { bd = dd; best = mk; }
+    });
+    if (st.plans[best] && st.plans[best].closed) best = S.planStart(st);
+    return best;
+  }
+  function samePaymentExists(st, accId, amount, date) {
+    return Object.keys(st.plans).some(function (k) { return ((st.plans[k] || {}).payments || []).some(function (p) { return p.accountId === accId && (p.auto || []).some(function (a) { return Math.abs(a.amount - amount) < 0.005 && daysApart(a.date, date) <= 3; }); }); });
+  }
+  function registerPayment(st, accId, amount, date, fp, label) {
+    if (samePaymentExists(st, accId, amount, date)) return { dup: true };
+    var mk = planMonthFor(st, accId, date), plan = st.plans[mk] = st.plans[mk] || { versions: [], payments: [] };
+    plan.payments = plan.payments || [];
+    var p = plan.payments.find(function (x) { return x.accountId === accId; });
+    if (!p) { p = { accountId: accId, date: date }; plan.payments.push(p); }
+    p.amount = r2((+p.amount || 0) + amount); p.date = date;
+    p.auto = (p.auto || []).concat([{ fp: fp, amount: r2(amount), date: date, label: label || 'correo' }]);
+    return { mk: mk };
+  }
+  function salaryIncomeId(st) {
+    var m = M(st), inc = (st.budget.incomes || []);
+    if (m.cfg.salaryIncomeId && inc.some(function (i) { return i.id === m.cfg.salaryIncomeId; })) return m.cfg.salaryIncomeId;
+    var f = inc.find(function (i) { return /sueldo|salario|n[oó]mina|rol/i.test(i.name); }) || inc[0];
+    return f ? f.id : null;
+  }
+  function salaryMonth(st, date) { var d = +date.slice(8, 10); return d >= (+M(st).cfg.salaryFromDay || 32) ? C.addMonths(C.monthKey(date), 1) : C.monthKey(date); }
+  function applySalary(st, ev, fp, force) {
+    var id = salaryIncomeId(st); if (!id) return 'Primero agrega tu sueldo en Presupuesto (ingresos).';
+    var mk = salaryMonth(st, ev.date), rec = S.monthRec(st, mk, true);
+    rec.autoIncomes = rec.autoIncomes || {}; var a = rec.autoIncomes[id] = rec.autoIncomes[id] || {};
+    var manual = rec.incomes[id] !== undefined && rec.incomes[id] !== null && rec.incomes[id] !== '' && !Object.keys(a).length;
+    if (manual && Math.abs(+rec.incomes[id] - ev.amount) > 1 && !force) return 'Ya registraste ' + money(+rec.incomes[id]) + ' a mano como sueldo de ' + C.fmtMonth(mk) + '.';
+    a[fp] = ev.amount; rec.incomes[id] = r2(Object.keys(a).reduce(function (s, k) { return s + a[k]; }, 0));
+    return { mk: mk };
+  }
+  function addExtra(st, ev, fp, source, name) {
+    var mk = C.monthKey(ev.date), rec = S.monthRec(st, mk, true);
+    if (rec.extras.some(function (x) { return x.mailFp === fp; })) return;
+    rec.extras.push({ id: C.uid('ex'), name: name || ev.counterparty || 'Ingreso extra', source: source || 'Música', amount: r2(ev.amount), date: ev.date, mailFp: fp });
+    return mk;
+  }
+  var BILL_RE = { internet: /internet|netlife|wifi|fibra/i, celular: /celular|m[oó]vil|tel[eé]fono|tigo|claro|movistar|plan/i };
+  function applyBill(st, ev) {
+    var item = (st.budget.items || []).find(function (i) { return BILL_RE[ev.service] && BILL_RE[ev.service].test(i.name); });
+    if (!item) return null;
+    var mk = C.monthKey(ev.date), rec = S.monthRec(st, mk, true);
+    rec.bills[item.id] = r2(ev.amount); if (ev.paid) rec.paid[item.id] = true;
+    return { item: item, mk: mk };
+  }
+  // Contacto aprendido: mismo nombre, o todas las palabras del nombre guardado aparecen en el nuevo (ANA PEREZ ⊂ PEREZ LOPEZ ANA MARIA).
+  function contactRule(m, name) {
+    if (!name) return null;
+    var n = norm(name); if (m.contacts[n]) return m.contacts[n];
+    var words = n.split(' ');
+    var k = Object.keys(m.contacts).find(function (key) { var w = key.split(' '); return w.length >= 2 && w.every(function (x) { return words.indexOf(x) >= 0; }); });
+    return k ? m.contacts[k] : null;
+  }
+  function isHousehold(m, suffix, name) {
+    var s = suf(suffix);
+    if (s && m.own[s]) return true;
+    var c = contactRule(m, name); return !!(c && c.action === 'interno');
+  }
+
+  // ------------------------------------------------------------------ motor: aplica un aviso
+  // Devuelve { status: 'ok' | 'pending' | 'skip', text }
+  function apply(st, ev, meta, decision) {
+    var m = M(st), fp = meta.fp, person = meta.person, d = decision || {};
+    var pend = function (reason, sug) { return { status: 'pending', reason: reason, sug: sug || {} }; };
+    var ok = function (text) { return { status: 'ok', text: text }; };
+    if (d.action === 'ignorar') return ok('Ignorado: ' + summary(ev));
+    switch (ev.type) {
+      case 'card_purchase': {
+        var r = d.accountId ? { acc: App.accById(d.accountId), principal: false } : cardAccount(st, ev.institution, ev.card);
+        if (!r || !r.acc) return pend('No sé a qué tarjeta registrada corresponde ' + ev.institution + ' ·' + (ev.card || '?') + '. Elige la tarjeta (o importa primero su estado de cuenta).', { action: 'tarjeta', inst: ev.institution });
+        if (d.accountId && d.remember) m.cardMap[ev.institution + '|' + ev.card] = d.accountId;
+        var inStmt = st.movements.find(function (x) { return x.accountId === r.acc.id && x.source !== 'correo' && x.statementId && Math.abs(x.amount - ev.amount) < 0.005 && daysApart(x.date, ev.date) <= 4; });
+        if (inStmt) return ok('Consumo ' + money(ev.amount) + ' en ' + ev.merchant + ': ya estaba en el estado de cuenta');
+        var cat = d.category ? { category: d.category, kind: 'consumo', review: false } : C.categorize({ desc: ev.merchant, accountType: 'tarjeta', direction: 'cargo' }, st.rules);
+        if (d.category && d.remember) rememberRule(st, ev.merchant, d.category);
+        addMov(st, { accountId: r.acc.id, date: ev.date, desc: ev.merchant, amount: ev.amount, kind: cat.kind === 'consumo' || !cat.kind ? 'consumo' : cat.kind, category: cat.category, review: !!cat.review, holder: ev.holder || null, card: ev.card, ref: ev.ref, fp: fp, note: r.principal ? '' : 'Tarjeta ·' + (ev.card || '') });
+        return ok('Consumo ' + money(ev.amount) + ' en ' + ev.merchant + ' · ' + (r.acc.alias || '') + (cat.review ? ' (por categorizar)' : ' → ' + cat.category));
+      }
+      case 'debit_purchase': {
+        var acc = bankAccount(st, ev.bankFrom, ev.fromAccount, person);
+        var c2 = d.category ? { category: d.category, kind: 'consumo' } : C.categorize({ desc: ev.merchant, accountType: 'cuenta', direction: 'cargo' }, st.rules);
+        if (d.category && d.remember) rememberRule(st, ev.merchant, d.category);
+        addMov(st, { accountId: acc.id, date: ev.date, desc: ev.merchant, amount: ev.amount, kind: 'consumo', category: c2.category, review: !!c2.review, holder: person, fp: fp });
+        return ok('Compra con débito ' + money(ev.amount) + ' en ' + ev.merchant + (c2.review ? ' (por categorizar)' : ' → ' + c2.category));
+      }
+      case 'bg_transfer': {
+        if (d.action === 'gasto') return apply(st, Object.assign({}, ev, { type: 'transfer_out', counterparty: ev.toName, bankFrom: 'Banco Guayaquil' }), meta, decision);
+        if (d.action === 'extra') return apply(st, Object.assign({}, ev, { type: 'transfer_in', counterparty: ev.fromName, bankTo: 'Banco Guayaquil' }), meta, decision);
+        var fromIn = isHousehold(m, ev.fromAccount, ev.fromName), toIn = isHousehold(m, ev.toAccount, ev.toName);
+        var fromMe = meta.ownNames && meta.ownNames.test(norm(ev.fromName)), toMe = meta.ownNames && meta.ownNames.test(norm(ev.toName));
+        if ((fromIn || fromMe) && (toIn || toMe) || d.action === 'interno') {
+          if (d.action === 'interno') { [ev.fromAccount, ev.toAccount].forEach(function (x) { if (suf(x)) m.own[suf(x)] = m.own[suf(x)] || { person: '', bank: 'Banco Guayaquil' }; }); }
+          return ok('Transferencia entre ustedes ' + money(ev.amount) + (ev.desc ? ' (' + ev.desc + ')' : '') + ' — no es gasto ni ingreso');
+        }
+        if (toIn || toMe) return apply(st, Object.assign({}, ev, { type: 'transfer_in', counterparty: ev.fromName, toAccount: ev.toAccount, bankTo: 'Banco Guayaquil' }), meta, decision);
+        if (fromIn || fromMe) return apply(st, Object.assign({}, ev, { type: 'transfer_out', counterparty: ev.toName, bankFrom: 'Banco Guayaquil' }), meta, decision);
+        return pend('Transferencia en Banco Guayaquil de ' + ev.fromName + ' a ' + ev.toName + '. Si es entre ustedes, márcala como "entre nosotros".', { action: 'interno' });
+      }
+      case 'own_transfer':
+        [ev.fromAccount, ev.toAccount].forEach(function (x) { if (suf(x) && !m.own[suf(x)]) m.own[suf(x)] = { person: person, bank: instKey(ev.bankFrom) }; });
+        return ok('Movimiento entre tus cuentas ' + money(ev.amount) + ' (·' + suf(ev.fromAccount) + ' → ·' + suf(ev.toAccount) + ')');
+      case 'transfer_out': {
+        var cr = contactRule(m, ev.counterparty), action = d.action || (isHousehold(m, ev.toAccount, ev.counterparty) || (meta.ownNames && meta.ownNames.test(norm(ev.counterparty))) ? 'interno' : cr ? cr.action : null);
+        var fromAcc = bankAccount(st, ev.bankFrom, ev.fromAccount, person);
+        if (action === 'interno') {
+          addFee(st, fromAcc.id, ev, fp, person);
+          if (d.action === 'interno' && d.remember) { m.contacts[norm(ev.counterparty)] = { action: 'interno', name: ev.counterparty }; if (suf(ev.toAccount)) m.own[suf(ev.toAccount)] = { person: d.person || ev.counterparty, bank: instKey(ev.bank) }; }
+          return ok('Dinero entre ustedes ' + money(ev.amount) + ' a ' + ev.counterparty + (ev.desc ? ' (' + ev.desc + ')' : '') + ' — no se cuenta como gasto');
+        }
+        var rc = C.categorize({ desc: ev.counterparty, accountType: 'cuenta', direction: 'cargo' }, st.rules);
+        var category = d.category || (cr && cr.category) || (rc.confidence === 'regla' ? rc.category : null);
+        if (!category) {
+          var guess = C.categorize({ desc: (ev.desc || '') + ' ' + ev.counterparty, accountType: 'cuenta', direction: 'cargo' }, []);
+          return pend('Transferencia a ' + ev.counterparty + (ev.desc ? ' ("' + ev.desc + '")' : '') + '. ¿Qué fue?', { action: 'gasto', category: guess.confidence !== 'baja' ? guess.category : 'Otros gastos' });
+        }
+        if (d.category && d.remember) rememberRule(st, ev.counterparty, d.category);
+        addMov(st, { accountId: fromAcc.id, date: ev.date, desc: ev.counterparty + (ev.desc ? ' · ' + ev.desc : ''), merchant: C.normalizeMerchant(ev.counterparty), amount: ev.amount, kind: 'consumo', category: category, holder: person, ref: ev.ref, fp: fp });
+        addFee(st, fromAcc.id, ev, fp, person);
+        return ok('Transferencia ' + money(ev.amount) + ' a ' + ev.counterparty + ' → ' + category);
+      }
+      case 'transfer_in': {
+        var cin = contactRule(m, ev.counterparty), emp = m.cfg.employer && norm(ev.counterparty).indexOf(norm(m.cfg.employer)) >= 0;
+        var act = d.action || (isHousehold(m, null, ev.counterparty) || (meta.ownNames && meta.ownNames.test(norm(ev.counterparty))) ? 'interno' : null) || (cin && cin.action) || null;
+        var salaryLike = /SAL|SARALY|SUELDO|NOMINA|ROL|PAYROLL|QUINCENA/i.test(ev.desc || '');
+        if (!act && emp && salaryLike) act = 'sueldo';
+        var toAcc = bankAccount(st, ev.bankTo || 'Produbanco', ev.toAccount, person);
+        if (act === 'interno') { if (d.remember) m.contacts[norm(ev.counterparty)] = { action: 'interno', name: ev.counterparty }; return ok('Dinero entre ustedes ' + money(ev.amount) + ' de ' + ev.counterparty + ' — no es ingreso'); }
+        if (act === 'sueldo') {
+          var rs = applySalary(st, ev, fp, !!d.action);
+          if (typeof rs === 'string') return pend(rs + ' ¿Usar el valor del banco?', { action: 'sueldo' });
+          if (d.remember || !m.cfg.employer) m.cfg.employer = m.cfg.employer || ev.counterparty;
+          addMov(st, { accountId: toAcc.id, date: ev.date, desc: 'Sueldo · ' + ev.counterparty, amount: ev.amount, direction: 'abono', kind: 'ingreso', category: 'Ingresos y devoluciones', holder: person, ref: ev.ref, fp: fp });
+          return ok('Sueldo ' + money(ev.amount) + ' registrado en Mes a mes de ' + C.fmtMonth(rs.mk));
+        }
+        if (act === 'reembolso') {
+          addMov(st, { accountId: toAcc.id, date: ev.date, desc: 'Reembolso de gastos · ' + ev.counterparty, amount: ev.amount, direction: 'abono', kind: 'devolucion', category: 'Ingresos y devoluciones', holder: person, ref: ev.ref, fp: fp, note: 'Reembolso: no cuenta como ingreso del mes' });
+          return ok('Reembolso ' + money(ev.amount) + ' de ' + ev.counterparty + ' (no cuenta como ingreso)');
+        }
+        if (act === 'extra') {
+          var src = d.source || (cin && cin.source) || 'Música';
+          if (d.remember) m.contacts[norm(ev.counterparty)] = { action: 'extra', source: src, name: ev.counterparty };
+          var mk = addExtra(st, ev, fp, src, d.name);
+          addMov(st, { accountId: toAcc.id, date: ev.date, desc: 'Ingreso extra · ' + ev.counterparty, amount: ev.amount, direction: 'abono', kind: 'ingreso', category: 'Ingresos y devoluciones', holder: person, ref: ev.ref, fp: fp });
+          return ok('Ingreso extra ' + money(ev.amount) + ' de ' + ev.counterparty + ' (' + src + ') en ' + C.fmtMonth(mk || C.monthKey(ev.date)));
+        }
+        if (emp) return pend(ev.counterparty + ' te depositó ' + money(ev.amount) + (ev.desc ? ' ("' + ev.desc + '")' : '') + '. No parece el sueldo: ¿es un reembolso de gastos?', { action: 'reembolso' });
+        if (!m.cfg.employer && salaryLike) return pend('Parece tu sueldo (' + ev.counterparty + '). Confírmalo y la app lo reconocerá cada mes.', { action: 'sueldo' });
+        return pend(ev.counterparty + ' te transfirió ' + money(ev.amount) + (ev.desc ? ' ("' + ev.desc + '")' : '') + '. ¿Qué es?', { action: 'extra', source: 'Música' });
+      }
+      case 'card_payment':
+      case 'card_payment_received': {
+        var cp = d.accountId ? { acc: App.accById(d.accountId) } : (ev.type === 'card_payment' ? cardAccount(st, instKey(ev.bank), ev.card) : cardAccount(st, ev.institution, null));
+        if (!cp || !cp.acc) return pend('Pago de tarjeta ' + money(ev.amount) + ' a ' + (ev.bank || ev.institution) + ' ·' + (ev.card || '?') + ': elige la tarjeta.', { action: 'tarjeta' });
+        if (d.accountId && d.remember && ev.card) m.cardMap[instKey(ev.bank || ev.institution) + '|' + ev.card] = d.accountId;
+        var rp = registerPayment(st, cp.acc.id, ev.amount, ev.date, fp, person);
+        if (ev.balanceAfter !== undefined && ev.balanceAfter !== null) cp.acc.liveBalance = { amount: ev.balanceAfter, date: ev.date };
+        if (ev.type === 'card_payment') {
+          var pa = bankAccount(st, ev.bankFrom, null, person);
+          addMov(st, { accountId: pa.id, date: ev.date, desc: 'Pago tarjeta ' + (cp.acc.alias || ''), amount: ev.amount, kind: 'pago', category: 'Pagos de tarjetas de crédito', holder: person, ref: ev.ref, fp: fp });
+          addFee(st, pa.id, ev, fp, person);
+        }
+        return ok(rp.dup ? 'Confirmación del pago a ' + cp.acc.alias + ' (ya registrado)' : 'Pago ' + money(ev.amount) + ' a ' + cp.acc.alias + ' registrado en el Plan de ' + C.fmtMonth(rp.mk));
+      }
+      case 'loan_payment': {
+        var la = d.accountId ? App.accById(d.accountId) : loanAccount(st, ev.loan, ev.institution);
+        if (!la) return pend('Pago del préstamo ' + (ev.product || '') + ' (doc. …' + (ev.loan || '') + ') por ' + money(ev.amount) + ': elige el préstamo.', { action: 'prestamo' });
+        var rl = registerPayment(st, la.id, ev.amount, ev.date, fp, person);
+        var debt = st.debts.find(function (x) { return x.accountId === la.id && E.isActive(x); });
+        if (debt && !rl.dup) { debt.lastPayment = { date: ev.date, total: ev.amount, capital: ev.capital, interest: ev.interest, source: 'correo' }; }
+        return ok(rl.dup ? 'Pago del préstamo ya registrado' : 'Cuota del ' + (la.alias || 'préstamo') + ' pagada: ' + money(ev.amount) + (ev.capital ? ' (capital ' + money(ev.capital) + ', interés ' + money(ev.interest) + ')' : '') + ' → Plan de ' + C.fmtMonth(rl.mk));
+      }
+      case 'bill': {
+        var rb = applyBill(st, ev);
+        if (!rb) return pend('Planilla de ' + ev.provider + ' por ' + money(ev.amount) + ': no encontré la planilla "' + ev.service + '" en tu presupuesto.', { action: 'ignorar' });
+        return ok('Planilla ' + rb.item.name + ' de ' + C.fmtMonth(rb.mk) + ': ' + money(ev.amount) + (ev.paid ? ' (pagada por débito; el cargo se cuenta en la tarjeta)' : ''));
+      }
+      case 'savings_in': case 'savings_out': case 'savings_interest': {
+        if (m.cfg.trackSavings) { var sign = ev.type === 'savings_out' ? -1 : 1; st.budget.emergencyCurrent = r2(Math.max(0, (+st.budget.emergencyCurrent || 0) + sign * ev.amount)); }
+        return ok({ savings_in: 'Aporte', savings_out: 'Retiro', savings_interest: 'Intereses' }[ev.type] + ' FlexiAhorro ' + money(ev.amount) + (m.cfg.trackSavings ? ' → fondo de emergencia ' + money(st.budget.emergencyCurrent) : ''));
+      }
+      case 'unknown': {
+        if (d.action === 'gasto' && d.category) {
+          var ua = bankAccount(st, meta.bank || 'Banco', null, person);
+          addMov(st, { accountId: ua.id, date: ev.date, desc: d.name || meta.subject || 'Gasto', amount: ev.amount, kind: 'consumo', category: d.category, holder: person, fp: fp });
+          return ok('Gasto ' + money(ev.amount) + ' → ' + d.category);
+        }
+        if (d.action === 'extra') { addExtra(st, ev, fp, d.source, d.name || meta.subject); return ok('Ingreso extra ' + money(ev.amount)); }
+        return pend('Correo bancario que no reconozco: "' + (meta.subject || '') + '"' + (ev.amount ? ' por ' + money(ev.amount) : '') + '.', { action: 'ignorar' });
+      }
+      default: return { status: 'skip' };
+    }
+  }
+  function rememberRule(st, desc, category) {
+    var mer = C.normalizeMerchant(desc);
+    st.rules = (st.rules || []).filter(function (r) { return r.merchant !== mer; });
+    st.rules.push({ merchant: mer, category: category, kind: 'consumo' });
+  }
+  function summary(ev) { return (ev.merchant || ev.counterparty || ev.provider || ev.type) + ' ' + (ev.amount ? money(ev.amount) : ''); }
+  Mail.apply = apply;
+
+  // Procesa un aviso ya descifrado. Devuelve true si quedó registrado (o pendiente) en el estado.
+  function ingest(st, payload, label) {
+    var m = M(st), person = personOf(m, label);
+    var ev = MP.parse({ from: payload.from, subject: payload.subject, date: payload.date, body: payload.body, attachments: (payload.att || []).map(function (a) { return a.name; }) });
+    if (ev.type === 'ignore' || ev.type === 'duplicate_notice' || ev.type === 'statement') return ev.type;
+    var fp = fpOf(ev);
+    if (m.seen[fp]) return 'dup';
+    var meta = { fp: fp, person: person, label: label, subject: payload.subject, ownNames: ownNamesRe(st), bank: instKey(payload.from) };
+    var res = apply(st, ev, meta);
+    m.seen[fp] = Date.now();
+    if (res.status === 'ok') log(m, res.text, ev, meta);
+    else if (res.status === 'pending') m.pending.push({ id: C.uid('pe'), fp: fp, date: ev.date, person: person, label: label, subject: payload.subject, reason: res.reason, sug: res.sug, ev: ev, at: new Date().toISOString() });
+    return res.status;
+  }
+  // Nombres de los titulares del hogar (para reconocer transferencias entre ustedes).
+  function ownNamesRe(st) {
+    var m = M(st), names = Object.keys(m.sources).map(function (k) { return m.sources[k].fullName; }).filter(Boolean);
+    st.accounts.forEach(function (a) { if (a.holderName && a.holderName.length > 8) names.push(a.holderName); });
+    var sets = names.map(norm).filter(Boolean).map(function (n) { return n.split(' ').filter(function (w) { return w.length >= 3; }); });
+    if (!sets.length) return null;
+    // Es del hogar si comparte al menos dos palabras con un titular (ANA PEREZ ↔ PEREZ LOPEZ ANA MARIA).
+    return { test: function (name) { var w = norm(name).split(' '); return sets.some(function (set) { return w.filter(function (x) { return x.length >= 3 && set.indexOf(x) >= 0; }).length >= 2; }); } };
+  }
+  Mail.ingest = ingest;
+
+  // Decide un pendiente desde la pantalla.
+  Mail.decide = function (st, id, decision) {
+    var m = M(st), i = m.pending.findIndex(function (p) { return p.id === id; });
+    if (i < 0) return null;
+    var pe = m.pending[i], meta = { fp: pe.fp, person: pe.person, label: pe.label, subject: pe.subject, ownNames: ownNamesRe(st) };
+    var res = apply(st, pe.ev, meta, decision);
+    if (res.status === 'pending') return res;
+    m.pending.splice(i, 1);
+    log(m, res.text || 'Resuelto', pe.ev, meta, decision.action === 'ignorar' ? 'ignorado' : 'ok');
+    // Con lo aprendido, otros pendientes pueden resolverse solos.
+    if (decision.remember) m.pending.slice().forEach(function (p) {
+      var r = apply(st, p.ev, { fp: p.fp, person: p.person, label: p.label, subject: p.subject, ownNames: ownNamesRe(st) });
+      if (r.status === 'ok') { m.pending.splice(m.pending.indexOf(p), 1); log(m, r.text, p.ev, p); }
+      else if (r.status === 'pending') { p.reason = r.reason; p.sug = r.sug || {}; delete draft[p.id]; }
+    });
+    return res;
+  };
+
+  // ------------------------------------------------------------------ sincronización con la bandeja
+  function canUse() { return Cloud.key && Cloud.profile === 'real' && App.profile === 'real' && App.state && M(App.state).sk; }
+  Mail.sync = async function (opts) {
+    if (Mail.busy || !canUse()) return;
+    if (App._dirty || Cloud.pending || document.querySelector('.modalBg')) return;
+    Mail.busy = true; Mail.error = null;
+    var stats = { ok: 0, pending: 0, ignored: 0, stmt: 0 };
+    try {
+      var after = 0, rounds = 0;
+      while (rounds++ < 20) {
+        var items = await Cloud.rpc('inbox_list', { p_after: after, p_limit: 40 });
+        if (!items || !items.length) break;
+        after = items[items.length - 1].id;
+        var ack = [], sk = M(App.state).sk;
+        var decoded = [];
+        for (var i = 0; i < items.length; i++) {
+          var it = items[i];
+          if (Mail.waitStmt[it.id]) continue;
+          try { decoded.push({ it: it, p: JSON.parse(new TextDecoder().decode(await gunzip(openSealed(it.ct, sk)))) }); }
+          catch (e) { console.warn('aviso ilegible', it.id, e.message); M(App.state).log.unshift({ at: new Date().toISOString(), text: 'No se pudo abrir un aviso de ' + (it.label || 'Gmail') + ': ' + e.message, status: 'error' }); ack.push(it.id); }
+        }
+        for (var j = 0; j < decoded.length; j++) {
+          var x = decoded[j];
+          if (x.it.kind === 'pdf') {
+            var att = (x.p.att || [])[0];
+            if (!att || !App.importPdfBytes) { ack.push(x.it.id); continue; }
+            var res = await App.importPdfBytes(att.name, unb64(att.b64), { auto: true, inboxId: x.it.id });
+            stats.stmt++;
+            App.mutate(function (st) { log(M(st), res.text, { date: (x.p.date || '').slice(0, 10) }, { person: personOf(M(st), x.it.label) }, res.status === 'imported' || res.status === 'duplicate' ? 'ok' : res.status); }, { noRender: true });
+            if (res.status === 'review') Mail.waitStmt[x.it.id] = att.name; else ack.push(x.it.id);
+            continue;
+          }
+          App.mutate(function (st) { var r = ingest(st, x.p, x.it.label); stats[r === 'ok' ? 'ok' : r === 'pending' ? 'pending' : 'ignored']++; M(st).lastSync = new Date().toISOString(); }, { noRender: true });
+          ack.push(x.it.id);
+        }
+        await App.flush(); await Cloud.chain;
+        if (App._saveErr || App._dirty) throw new Error('No se pudo guardar; se reintentará.');
+        if (ack.length) await Cloud.rpc('inbox_ack', { p_ids: ack });
+        if (items.length < 40) break;
+      }
+      Mail.lastSync = Date.now();
+      if (stats.ok + stats.pending + stats.stmt) Cloud.rpc('log_event', { p_action: 'procesar_correo' }).catch(function () { });
+      await maybeSummary();
+      if (App.ui.route === 'correo') refreshInfo();
+      if (opts && opts.manual) App.toast(stats.ok + stats.pending + stats.stmt ? 'Correo revisado: ' + stats.ok + ' registrados, ' + stats.pending + ' por revisar' + (stats.stmt ? ', ' + stats.stmt + ' estados de cuenta' : '') + '.' : 'No hay avisos nuevos.', 'ok');
+    } catch (e) { Mail.error = e.message; if (opts && opts.manual) App.toast(e.message, 'bad'); }
+    finally { Mail.busy = false; App.render(); }
+    return stats;
+  };
+  Mail.ackStatement = function (inboxId) { if (!inboxId) return; delete Mail.waitStmt[inboxId]; Cloud.rpc('inbox_ack', { p_ids: [inboxId] }).catch(function () { }); };
+
+  // ------------------------------------------------------------------ resumen cifrado para el correo semanal
+  function buildSummary() {
+    var st = App.state, c = App.calc(), mk = C.monthKey(C.todayISO()), ms = S.monthSummary(st, mk), m = M(st);
+    var from = mk + '-01', spent = {};
+    st.movements.forEach(function (mv) { if (C.isSpending(mv) && mv.date >= from && mv.date.slice(0, 7) === mk) spent[mv.category] = r2((spent[mv.category] || 0) + mv.amount); });
+    var budgetByCat = {}; (S.effectiveBudget(st, mk).items || []).forEach(function (i) { budgetByCat[i.category] = r2((budgetByCat[i.category] || 0) + (+i.amount || 0)); });
+    var plan = st.plans[c.start] || {}, dues = App.accountDues ? App.accountDues(c) : [];
+    var pays = dues.map(function (a) { var acc = App.accById(a.accountId), p = (plan.payments || []).find(function (x) { return x.accountId === a.accountId; }); return { name: acc ? acc.alias : '', min: a.min, date: a.date, paid: p ? +p.amount || 0 : 0 }; });
+    return {
+      v: 1, at: new Date().toISOString(), month: mk, monthLabel: C.fmtMonth(mk, true), planMonth: C.fmtMonth(c.start, true),
+      income: ms.income, salary: ms.salary, extras: ms.extras, realIncome: ms.realIncome, bills: ms.bills,
+      spent: Object.keys(spent).sort(function (a, b) { return spent[b] - spent[a]; }).slice(0, 12).map(function (k) { return { cat: k, amount: spent[k], budget: budgetByCat[k] || 0 }; }),
+      debt: { total: c.total, baseline: st.baseline ? st.baseline.totalDebt : null, freeMonth: c.sim && c.sim.debtFreeMonth ? C.fmtMonth(c.sim.debtFreeMonth, true) : null },
+      payments: pays, pending: m.pending.length, review: st.movements.filter(function (x) { return x.review && !x.excluded; }).length,
+      emergency: st.budget.emergencyCurrent || 0
+    };
+  }
+  async function maybeSummary(force) {
+    var m = M(App.state);
+    if (!m.sumKey) return;
+    var s = buildSummary(), key = JSON.stringify(Object.assign({}, s, { at: 0 }));
+    if (!force && key === Mail._lastSum && Date.now() - (Mail._lastSumAt || 0) < 6 * 3600e3) return;
+    try { await Cloud.rpc('save_summary', { p_ct: secretSeal(s, m.sumKey) }); Mail._lastSum = key; Mail._lastSumAt = Date.now(); } catch (e) { }
+  }
+  Mail.buildSummary = buildSummary;
+
+  // ------------------------------------------------------------------ configuración: claves y buzones
+  async function refreshInfo() {
+    try {
+      var r = await Promise.all([Cloud.rpc('inbox_count'), Cloud.rpc('list_ingest_tokens')]);
+      Mail.enabled = r[0].enabled; Mail.inboxCount = r[0].count; Mail.tokens = r[1]; Mail.infoAt = Date.now();
+    } catch (e) { Mail.error = e.message; }
+    if (App.ui.route === 'correo') App.render();
+  }
+  App.actions.mailEnable = async function () {
+    if (Cloud.role !== 'owner') return App.toast('Solo el administrador del hogar puede activarla.', 'bad');
+    var kp = nacl.box.keyPair(), pk = b64(kp.publicKey);
+    var m = M(App.state), force = !!m.sk;
+    if (force && !(await App.confirm('Generar claves nuevas', 'Los programas de Gmail ya conectados dejarán de funcionar y habrá que volver a configurarlos.', 'Generar', true))) return;
+    try {
+      await Cloud.rpc('set_inbox_key', { p_pk: pk, p_force: force });
+      App.mutate(function (st) { var mm = M(st); mm.pk = pk; mm.sk = b64(kp.secretKey); mm.sumKey = b64(nacl.randomBytes(32)); mm.enabledAt = new Date().toISOString(); });
+      await App.flush();
+      App.toast('Automatización activada. Ahora conecta tu Gmail.', 'ok'); refreshInfo();
+    } catch (e) { App.toast(e.message, 'bad'); }
+  };
+  App.actions.mailConnect = function () {
+    var members = (Cloud.sec && Cloud.sec.members) || [];
+    var d = new Date(Date.now() - 25 * 864e5).toISOString().slice(0, 10);
+    App.modal('<h2>Conectar un Gmail</h2><p class="small">Se crea un permiso <b>de solo escritura</b> para el programa de ese Gmail: puede dejar avisos cifrados, pero no puede leer los datos del hogar.</p>' +
+      '<div class="form"><label class="f"><span>¿De quién es el correo?</span><input id="mcPerson" placeholder="Ej.: Ana" value="' + (Object.keys(M(App.state).sources).length ? '' : esc((Cloud.user.email || '').split('@')[0])) + '"></label>' +
+      '<label class="f"><span>Nombre completo como aparece en el banco</span><input id="mcFull" placeholder="APELLIDOS Y NOMBRES, como en el estado de cuenta"></label>' +
+      '<label class="f"><span>Leer correos desde</span><input id="mcFrom" type="date" value="' + d + '"></label></div>' +
+      '<p class="tiny muted">Sugerencia: desde el último corte de tus tarjetas, para que coincida con los estados de cuenta que ya importaste.</p><div id="mcOut"></div>' +
+      '<div class="acts"><button data-act="closeModal">Cerrar</button><button class="primary" data-act="mailConnectGo" id="mcGo">Crear código de configuración</button></div>');
+    void members;
+  };
+  App.actions.mailConnectGo = async function () {
+    var person = document.getElementById('mcPerson').value.trim(), full = document.getElementById('mcFull').value.trim(), from = document.getElementById('mcFrom').value;
+    if (!person) return App.toast('Escribe de quién es el correo.', 'bad');
+    var label = 'Gmail de ' + person, m = M(App.state);
+    try {
+      var r = await Cloud.rpc('create_ingest_token', { p_label: label });
+      App.mutate(function (st) { M(st).sources[label] = { person: person, fullName: full, tokenId: r.id, from: from }; }, { noRender: true });
+      await App.flush();
+      var code = 'LF1.' + btoa(JSON.stringify({ u: Cloud.cfg.supabaseUrl, k: Cloud.cfg.supabaseKey, t: r.token, p: m.pk, s: m.sumKey, n: label, d: from, a: location.origin + location.pathname }));
+      document.getElementById('mcOut').innerHTML = '<div class="alert ok mt"><div class="small"><b>Código de configuración</b> (se muestra una sola vez; trátalo como una contraseña):</div><textarea class="setupCode" readonly rows="4">' + esc(code) + '</textarea>' +
+        '<div class="row"><button class="sm" data-act="secCopy" data-v="' + esc(code) + '">Copiar código</button><a class="sm" href="automatizacion/Codigo.gs.txt" target="_blank" rel="noopener">Abrir el programa para Gmail</a></div>' +
+        '<ol class="small mt"><li>Entra a <b>script.google.com</b> con el Gmail de ' + esc(person) + ' › Nuevo proyecto.</li><li>Pega el programa completo y, en la línea <code>CODIGO_CONFIGURACION</code>, pega este código.</li><li>Elige la función <b>instalar</b> › Ejecutar › acepta los permisos.</li></ol></div>';
+      document.getElementById('mcGo').remove(); refreshInfo();
+    } catch (e) { App.toast(e.message, 'bad'); }
+  };
+  App.actions.mailRevoke = async function (el) {
+    if (!(await App.confirm('Desconectar buzón', 'El programa de <b>' + esc(el.dataset.label) + '</b> dejará de poder enviar avisos. Para reconectarlo hay que crear un código nuevo.', 'Desconectar', true))) return;
+    try { await Cloud.rpc('revoke_ingest_token', { p_id: el.dataset.id }); App.toast('Buzón desconectado.', 'ok'); refreshInfo(); } catch (e) { App.toast(e.message, 'bad'); }
+  };
+  App.actions.mailSync = function () { return Mail.sync({ manual: true }); };
+
+  // ------------------------------------------------------------------ pantalla
+  var EXTRA_SRC = S.EXTRA_SOURCES;
+  var ACTIONS = {
+    gasto: 'Es un gasto', extra: 'Ingreso extra', sueldo: 'Es mi sueldo', reembolso: 'Reembolso (no es ingreso)', interno: 'Entre nosotros (no es gasto)', tarjeta: 'Asignar a una tarjeta', prestamo: 'Asignar a un préstamo', ignorar: 'Ignorar'
+  };
+  function actionsFor(pe) {
+    switch (pe.ev.type) {
+      case 'transfer_out': return ['gasto', 'interno', 'ignorar'];
+      case 'transfer_in': return ['extra', 'sueldo', 'reembolso', 'interno', 'ignorar'];
+      case 'bg_transfer': return ['interno', 'gasto', 'extra', 'ignorar'];
+      case 'card_purchase': return ['tarjeta', 'ignorar'];
+      case 'card_payment': case 'card_payment_received': return ['tarjeta', 'ignorar'];
+      case 'loan_payment': return ['prestamo', 'ignorar'];
+      case 'unknown': return ['gasto', 'extra', 'ignorar'];
+      default: return ['ignorar'];
+    }
+  }
+  var draft = {};
+  function pendRow(pe) {
+    var dr = draft[pe.id] = draft[pe.id] || { action: pe.sug.action || actionsFor(pe)[0], category: pe.sug.category || 'Otros gastos', source: pe.sug.source || 'Música', remember: true };
+    var acts = actionsFor(pe); if (acts.indexOf(dr.action) < 0) dr.action = acts[0];
+    var ev = pe.ev, extra = '';
+    if (dr.action === 'gasto') extra = '<select class="sm" data-chg="mailDraft" data-id="' + pe.id + '" data-k="category">' + App.catOptions(dr.category) + '</select>';
+    else if (dr.action === 'extra') extra = '<select class="sm" data-chg="mailDraft" data-id="' + pe.id + '" data-k="source">' + EXTRA_SRC.map(function (s) { return App.opt(s, s, dr.source); }).join('') + '</select>';
+    else if (dr.action === 'tarjeta' || dr.action === 'prestamo') {
+      var type = dr.action === 'tarjeta' ? 'tarjeta' : 'prestamo', accs = App.state.accounts.filter(function (a) { return a.type === type; });
+      if (!dr.accountId && accs[0]) dr.accountId = accs[0].id;
+      extra = accs.length ? '<select class="sm" data-chg="mailDraft" data-id="' + pe.id + '" data-k="accountId">' + accs.map(function (a) { return App.opt(a.id, a.alias, dr.accountId); }).join('') + '</select>' : '<span class="tiny muted">Importa primero su estado de cuenta</span>';
+    }
+    var who = ev.counterparty || ev.merchant || ev.fromName || ev.provider || pe.subject || '';
+    var canRemember = /transfer|bg_|card_purchase|card_payment/.test(ev.type) && dr.action !== 'ignorar';
+    return '<div class="pendItem"><div class="pendHead"><div><b>' + esc(who) + '</b>' + (ev.desc ? ' <span class="muted">“' + esc(ev.desc) + '”</span>' : '') + '<div class="tiny muted">' + C.fmtDate(pe.date) + ' · ' + esc(pe.person || '') + '</div></div>' +
+      '<div class="pendAmt ' + (/transfer_in|savings_in/.test(ev.type) ? 'amtNeg' : '') + '">' + (ev.amount ? money(ev.amount) : '—') + '</div></div>' +
+      '<div class="small muted">' + esc(pe.reason) + '</div>' +
+      '<div class="pendCtl"><select class="sm" data-chg="mailDraft" data-id="' + pe.id + '" data-k="action">' + acts.map(function (a) { return App.opt(a, ACTIONS[a], dr.action); }).join('') + '</select>' + extra +
+      '<button class="sm primary" data-act="mailDecide" data-id="' + pe.id + '">Aplicar</button></div>' +
+      (canRemember ? '<label class="chk tiny"><input type="checkbox" data-chg="mailDraft" data-id="' + pe.id + '" data-k="remember" ' + (dr.remember ? 'checked' : '') + '> Recordar para la próxima vez</label>' : '') + '</div>';
+  }
+  App.actions.mailDraft = function (el) {
+    var d = draft[el.dataset.id] = draft[el.dataset.id] || {}, k = el.dataset.k;
+    d[k] = el.type === 'checkbox' ? el.checked : el.value;
+    if (k === 'action') App.render();
+  };
+  App.actions.mailDecide = function (el) {
+    var id = el.dataset.id, d = draft[id] || {}, res;
+    App.mutate(function (st) { res = Mail.decide(st, id, d); });
+    if (res && res.status === 'pending') App.toast(res.reason, 'bad'); else { delete draft[id]; App.toast('Listo.', 'ok'); maybeSummary(); }
+  };
+  App.actions.mailDecideAll = async function () {
+    var m = M(App.state), n = 0;
+    if (!(await App.confirm('Aplicar todas las sugerencias', 'Se aplicará la opción que muestra cada fila (' + m.pending.length + ').', 'Aplicar'))) return;
+    App.mutate(function (st) { M(st).pending.slice().forEach(function (pe) { var d = draft[pe.id] || { action: pe.sug.action || actionsFor(pe)[0], category: pe.sug.category || 'Otros gastos', source: pe.sug.source || 'Música', remember: true }; var r = Mail.decide(st, pe.id, d); if (r && r.status !== 'pending') n++; }); });
+    App.toast(n + ' resueltos.', 'ok');
+  };
+  App.actions.mailCfg = function (el) {
+    App.mutate(function (st) { var c = M(st).cfg, k = el.dataset.k; c[k] = el.type === 'checkbox' ? el.checked : el.type === 'number' ? +el.value : el.value.trim(); });
+  };
+  App.actions.mailForget = function (el) {
+    App.mutate(function (st) { var m = M(st), t = el.dataset.t, k = el.dataset.k; if (t === 'contact') delete m.contacts[k]; else if (t === 'own') delete m.own[k]; else if (t === 'card') delete m.cardMap[k]; else if (t === 'rule') st.rules = st.rules.filter(function (r) { return r.merchant !== k; }); });
+  };
+
+  App.views.correo_after = function () { if (!Mail.infoAt || Date.now() - Mail.infoAt > 60000) refreshInfo(); };
+  App.views.correo = function () {
+    var st = App.state, m = M(st), owner = Cloud.role === 'owner';
+    if (App.profile !== 'real') return '<div class="alert info">La automatización por correo funciona solo con tus datos reales.</div>';
+    var html = '';
+    if (!m.sk) {
+      return '<div class="card"><h2>Automatización por correo</h2><p>Los avisos que te llegan del banco (consumos, transferencias, pagos, estados de cuenta) se pueden registrar solos en la app. Un pequeño programa en tu Gmail los cifra y los deja aquí; <b>solo ustedes pueden leerlos</b>.</p>' +
+        '<ul class="small"><li>Lo claro se registra solo: consumos de tarjeta, sueldo, pagos de tarjetas y préstamos, planillas.</li><li>Lo dudoso queda en <b>Pendientes</b> (por ejemplo, una transferencia a alguien nuevo).</li><li>Los estados de cuenta en PDF se importan solos si cuadran.</li></ul>' +
+        (owner ? '<button class="primary" data-act="mailEnable">Activar la automatización</button>' : '<div class="alert info">El administrador del hogar debe activarla.</div>') + '</div>';
+    }
+    var waiting = Object.keys(Mail.waitStmt);
+    html += '<div class="card"><div class="row between"><h2>Pendientes de revisar (' + m.pending.length + ')</h2><div class="row"><span class="small muted">' + (Mail.busy ? 'Revisando…' : m.lastSync ? 'Última revisión: ' + new Date(m.lastSync).toLocaleString('es-EC', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '') + '</span><button class="sm" data-act="mailSync" ' + (Mail.busy ? 'disabled' : '') + '>Revisar ahora</button></div></div>' +
+      (Mail.error ? '<div class="alert bad">' + esc(Mail.error) + '</div>' : '') +
+      (m.pending.length ? '<div class="pendList">' + m.pending.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; }).map(pendRow).join('') + '</div>' +
+        '<div class="row mt"><button class="sm" data-act="mailDecideAll">Aplicar todas las sugerencias</button><span class="tiny muted">Con “Recordar”, la próxima vez se registra solo.</span></div>' : '<p class="muted small">No hay nada pendiente. 👍</p>') +
+      (waiting.length ? '<div class="alert info mt"><b>' + waiting.length + ' estado(s) de cuenta esperan revisión</b> (' + waiting.map(function (k) { return esc(Mail.waitStmt[k]); }).join(', ') + '). <a href="#/importar">Revisarlos en Importar</a></div>' : '');
+    var review = st.movements.filter(function (x) { return x.review && !x.excluded && x.source === 'correo'; }).length;
+    if (review) html += '<div class="alert warn mt">' + review + ' consumos del correo necesitan categoría. <a href="#/movimientos">Categorizarlos en Movimientos</a></div>';
+    html += '</div>';
+    // registro
+    html += '<div class="card mt"><h3>Registrado desde el correo</h3>' + (m.log.length ? '<div class="mailLog">' + m.log.slice(0, 80).map(function (l) { return '<div class="' + (l.status === 'error' ? 'err' : '') + '"><span class="tiny muted">' + (l.date ? C.fmtDate(l.date) : '') + (l.who ? ' · ' + esc(l.who) : '') + '</span><span class="small">' + (l.status === 'error' ? '⚠ ' : '') + esc(l.text) + '</span></div>'; }).join('') + '</div>' : '<p class="muted small">Todavía no llega nada. Cuando conectes un Gmail, aquí verás cada aviso registrado.</p>') + '</div>';
+    // buzones
+    var toks = Mail.tokens || [];
+    html += '<div class="card mt"><div class="row between"><h3>Buzones de Gmail conectados</h3>' + (owner ? '<button class="sm primary" data-act="mailConnect">+ Conectar un Gmail</button>' : '') + '</div>' +
+      (toks.length ? '<table><tbody>' + toks.map(function (t) { return '<tr class="' + (t.revoked ? 'dim' : '') + '"><td class="small"><b>' + esc(t.label) + '</b></td><td class="small">' + (t.revoked ? 'desconectado' : t.last_used_at ? 'último envío ' + new Date(t.last_used_at).toLocaleString('es-EC', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '<span class="badge b-warn">aún no envía nada</span>') + (t.last_error ? ' <span class="badge b-bad">' + esc(t.last_error) + '</span>' : '') + '</td><td>' + (owner && !t.revoked ? '<button class="sm danger" data-act="mailRevoke" data-id="' + t.id + '" data-label="' + esc(t.label) + '">Desconectar</button>' : '') + '</td></tr>'; }).join('') + '</tbody></table>' : '<p class="small muted">' + (Mail.tokens ? 'Ninguno todavía.' : 'Cargando…') + '</p>') +
+      '<p class="tiny muted">En la bandeja del servidor hay ' + (Mail.inboxCount || 0) + ' aviso(s) cifrado(s) sin procesar. Se procesan cuando alguno de ustedes abre la app.</p></div>';
+    // ajustes
+    var c = m.cfg, incs = st.budget.incomes || [];
+    html += '<div class="card mt"><h3>Ajustes</h3><div class="form">' +
+      '<label class="f"><span>Empresa que te paga el sueldo</span><input value="' + esc(c.employer) + '" placeholder="se aprende al confirmar el primer sueldo" data-chg="mailCfg" data-k="employer"></label>' +
+      '<label class="f"><span>Sueldo de Mes a mes</span><select data-chg="mailCfg" data-k="salaryIncomeId">' + App.opt('', '(automático)', c.salaryIncomeId) + incs.map(function (i) { return App.opt(i.id, i.name, c.salaryIncomeId); }).join('') + '</select></label>' +
+      '<label class="f"><span>El sueldo que llega desde el día… cuenta para el mes siguiente</span><input type="number" min="1" max="32" value="' + esc(c.salaryFromDay) + '" data-chg="mailCfg" data-k="salaryFromDay"></label>' +
+      '<label class="chk small"><input type="checkbox" ' + (c.trackSavings ? 'checked' : '') + ' data-chg="mailCfg" data-k="trackSavings"> Aportes y retiros de FlexiAhorro actualizan el fondo de emergencia</label></div>' +
+      '<p class="tiny muted">Con 25: un sueldo que llega el 30 de octubre se usa para noviembre. Pon 32 si prefieres contarlo en el mismo mes.</p>';
+    var list = function (title, obj, t, fmt) { var ks = Object.keys(obj); return '<h4 class="mt">' + title + ' (' + ks.length + ')</h4>' + (ks.length ? '<div class="row wrap">' + ks.map(function (k) { return '<span class="chip">' + fmt(k, obj[k]) + ' <a href="#" data-act="mailForget" data-t="' + t + '" data-k="' + esc(k) + '" title="Olvidar">✕</a></span>'; }).join('') + '</div>' : '<p class="tiny muted">—</p>'); };
+    html += list('Cuentas del hogar (transferencias entre ellas no son gasto)', m.own, 'own', function (k, v) { return esc((v.bank || '') + ' ·' + k + (v.person ? ' (' + v.person + ')' : '')); });
+    html += list('Contactos aprendidos', m.contacts, 'contact', function (k, v) { return esc((v.name || k) + ' → ' + ({ interno: 'entre nosotros', extra: 'ingreso extra (' + (v.source || '') + ')', reembolso: 'reembolso', sueldo: 'sueldo' }[v.action] || v.action)); });
+    html += list('Tarjetas adicionales asignadas', m.cardMap, 'card', function (k, v) { var a = App.accById(v); return esc(k.replace('|', ' ·') + ' → ' + (a ? a.alias : '?')); });
+    html += '</div>';
+    html += '<div class="card mt"><h3>Seguridad</h3><ul class="small"><li>Cada aviso viaja cifrado con la clave pública del hogar. El servidor y el programa de Gmail no pueden leer lo que ya está en la app.</li><li>El código de configuración solo permite <b>enviar</b> avisos y leer el resumen semanal. Si se pierde, desconecta ese buzón aquí.</li><li>La clave privada vive dentro de los datos cifrados del hogar: la conocen solo quienes tienen la clave del hogar.</li></ul>' +
+      (owner ? '<button class="sm" data-act="mailEnable">Generar claves nuevas</button>' : '') + '</div>';
+    return html;
+  };
+
+  // ------------------------------------------------------------------ integración
+  var idx = App.SECTIONS.findIndex(function (s) { return s[0] === 'config'; });
+  App.SECTIONS.splice(idx, 0, ['correo', 'Correo automático', '✉']);
+  var baseRender = App.render;
+  App.render = function () {
+    baseRender();
+    var n = App.state && App.state.mail ? (App.state.mail.pending || []).length + Object.keys(Mail.waitStmt).length : 0;
+    var a = document.querySelector('.nav a[href="#/correo"]');
+    if (a && n && !a.querySelector('.cnt')) { var s = document.createElement('span'); s.className = 'cnt'; s.textContent = n; a.appendChild(s); }
+  };
+  App.onImportDone = function (imp) { Mail.ackStatement(imp.inboxId); };
+  // Revisión periódica mientras la app está abierta.
+  Mail.start = function () {
+    if (Mail._timer) return;
+    setTimeout(function () { Mail.sync(); }, 2500);
+    Mail._timer = setInterval(function () { if (document.visibilityState === 'visible') Mail.sync(); }, 180000);
+    document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible' && Date.now() - Mail.lastSync > 60000) Mail.sync(); });
   };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 

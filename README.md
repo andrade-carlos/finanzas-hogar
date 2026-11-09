@@ -13,6 +13,10 @@ Se publica gratis con **GitHub Pages**. Las cuentas y los datos cifrados se guar
 
 Este repositorio no contiene datos personales ni secretos. La clave publicable de Supabase que va en `config.json` está pensada para ser pública.
 
+## Automatización por correo (opcional)
+
+Un programa en tu propio Gmail (Google Apps Script) lee los avisos de los bancos (consumos, transferencias, pagos, estados de cuenta en PDF), los **cifra con la clave pública del hogar** (X25519 + XSalsa20-Poly1305) y los deja en una bandeja del servidor usando un token **de solo escritura**. La app los descifra con la clave privada, que solo existe dentro de los datos cifrados del hogar. Lo claro se registra solo; lo dudoso queda en *Correo automático › Pendientes*. Cada lunes el programa envía un resumen por correo.
+
 ## Archivos
 
 | Archivo | Para qué sirve |
@@ -21,7 +25,8 @@ Este repositorio no contiene datos personales ni secretos. La clave publicable d
 | `config.json` | Dirección y clave publicable de tu proyecto de Supabase (lo único que debes editar) |
 | `supabase/schema.sql` | Crea las tablas y reglas de seguridad (se ejecuta una vez en Supabase) |
 | `supabase/utilidades.sql` | Consultas para el administrador (reiniciar dos pasos, ver usuarios, empezar de cero) |
-| `.github/workflows/keepalive.yml` | Consulta mínima cada 3 días para que Supabase no pause el proyecto |
+| `.github/workflows/keepalive.yml` | Escritura mínima cada 3 días para que Supabase no pause el proyecto |
+| `automatizacion/Codigo.gs.txt` | Programa para Gmail (Google Apps Script) que envía cifrados los avisos bancarios a la app |
 
 ## Instalación (resumen)
 
