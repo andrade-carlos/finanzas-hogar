@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-jnTVrhdXeH0WtQcodhJ6tUkrXVF3ZuruEgoekzBAKy8=' 'sha256-tKJf9AqoVeciyRhEol3T8vwgBvq3Zx7LLWBOXwU9Ku8=' 'sha256-LQliFBaphYmmoUwuD3Bk4FNOt92m1Z43QrUdLPSEHns=' 'sha256-mi77sEKFNvL85Pk/3r8oTcwqca9u/rYmKkBe3F2Ad/U=' 'sha256-i8Yqs+A7J0iHHzjqVRB1qhQmi1XgqVj1umjT6pmWCHE=' 'sha256-5dNx8jm/+YgajgSduK9c8a7JZe5UMk1eZns/d0YgV6c='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'self' https://*.supabase.co; worker-src blob:; form-action 'none'; base-uri 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-jnTVrhdXeH0WtQcodhJ6tUkrXVF3ZuruEgoekzBAKy8=' 'sha256-tKJf9AqoVeciyRhEol3T8vwgBvq3Zx7LLWBOXwU9Ku8=' 'sha256-LQliFBaphYmmoUwuD3Bk4FNOt92m1Z43QrUdLPSEHns=' 'sha256-mi77sEKFNvL85Pk/3r8oTcwqca9u/rYmKkBe3F2Ad/U=' 'sha256-nvhveUqVzPcjMmUwKL8nKo/YzVWfwGUSNrwzqnU/G4I=' 'sha256-5dNx8jm/+YgajgSduK9c8a7JZe5UMk1eZns/d0YgV6c='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'self' https://*.supabase.co; worker-src blob:; form-action 'none'; base-uri 'none'; object-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex, nofollow, noarchive">
 <title>Libertad Financiera</title>
@@ -179,6 +179,18 @@ code{background:var(--line2);padding:1px 5px;border-radius:5px;font-size:.85em}
   .topbar{padding:8px 12px}
 }
 @media print{.side,.topbar,.demoBanner,button{display:none!important}.content{padding:0}.card{break-inside:avoid;box-shadow:none}}
+
+/* Deudas mes a mes */
+.trendHead{font-size:1.02rem;margin:.2rem 0 .8rem;padding:10px 14px;border-radius:10px;background:var(--line2)}
+.trendHead.good{background:rgba(47,160,110,.14)}
+.trendHead.bad{background:rgba(214,69,69,.14)}
+.trendTbl .chg{font-weight:600;white-space:nowrap}
+.trendTbl .chg.good{color:#2f9e6e}
+.trendTbl .chg.bad{color:#d64545}
+.chgBar{display:block;height:6px;border-radius:3px;background:var(--line2);margin-top:4px;min-width:90px}
+.chgBar i{display:block;height:100%;border-radius:3px;background:var(--ink3)}
+.chgBar.good i{background:#2f9e6e}
+.chgBar.bad i{background:#d64545}
 
 /* ---- capa en línea ---- */
 .authWrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px;background:var(--bg)}
@@ -2301,6 +2313,81 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
     return { current: s, best: best, closed: ks.length, met: ks.filter(function (k) { return state.plans[k] && state.plans[k].closed && state.plans[k].closed.met; }).length };
   }
 
+  // ---------- Deudas mes a mes: ¿avanzo o retrocedo? ----------
+  // Saldo total de deudas al cierre de cada mes (con el último saldo conocido de cada obligación),
+  // el cambio contra el mes anterior y qué lo explica: pagos, consumos nuevos e intereses.
+  function lastBalance(d, dateISO) {
+    var hs = (d.history || []).filter(function (h) { return h.date <= dateISO && h.balance !== null && h.balance !== undefined; });
+    if (!hs.length) {
+      // Préstamo importado después de esa fecha: el saldo sale de su tabla de cuotas (la próxima cuota pendiente).
+      var row = (d.schedule || []).filter(function (r) { return r.date > dateISO; })[0];
+      if (d.kind === 'prestamo' && row && row.balanceBefore && C.daysBetween(dateISO, row.date) <= 35) return { balance: +row.balanceBefore, date: dateISO, estimated: true };
+      return null;
+    }
+    hs.sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : (a.source === 'documento') - (b.source === 'documento'); });
+    var h = hs[hs.length - 1];
+    return { balance: +h.balance, date: h.date, estimated: h.source !== 'documento' };
+  }
+  function planPayments(state) {
+    var out = [];
+    Object.keys(state.plans || {}).forEach(function (k) {
+      ((state.plans[k] || {}).payments || []).forEach(function (p) {
+        var auto = p.auto || [], autoSum = C.sum(auto, function (a) { return a.amount; });
+        auto.forEach(function (a) { out.push({ accountId: p.accountId, date: a.date, amount: +a.amount }); });
+        var rest = r2((+p.amount || 0) - autoSum);
+        if (rest > 0.005 && p.date) out.push({ accountId: p.accountId, date: p.date, amount: rest });
+      });
+    });
+    return out;
+  }
+  function liveEstimate(state, d, today) {
+    var lb = lastBalance(d, today); if (!lb) return null;
+    var bal = lb.balance, since = lb.date, est = lb.estimated;
+    if (d.kind === 'rotativo') {
+      var cons = C.sum(state.movements.filter(function (m) { return m.accountId === d.accountId && m.source === 'correo' && C.isSpending(m) && m.date > since && m.date <= today; }), function (m) { return m.amount; });
+      var pays = C.sum(planPayments(state).filter(function (p) { return p.accountId === d.accountId && p.date > since && p.date <= today; }), function (p) { return p.amount; });
+      if (cons || pays) { bal = r2(Math.max(0, bal + cons - pays)); est = true; }
+    } else if (d.kind === 'prestamo') {
+      var cap = C.sum((d.bankPayments || []).filter(function (p) { return p.date > since && p.date <= today; }), function (p) { return p.capital || 0; });
+      if (cap) { bal = r2(Math.max(0, bal - cap)); est = true; }
+    }
+    return { balance: bal, estimated: est };
+  }
+  function debtTrend(state, today) {
+    today = today || C.todayISO();
+    var debts = state.debts.filter(function (d) { return (d.history || []).length || d.balance !== null; });
+    if (!debts.length) return { rows: [] };
+    var firstDates = debts.map(function (d) { var hs = (d.history || []).map(function (h) { return h.date; }).sort(), f = hs[0] || d.balanceAsOf || today; if (d.kind === 'prestamo' && d.schedule && d.schedule.length) { var s0 = C.addDays(d.schedule[0].date, -35); if (s0 < f) f = s0; } return f; });
+    var cardAcc = {}; state.accounts.forEach(function (a) { if (a.type === 'tarjeta') cardAcc[a.id] = true; });
+    var curMk = C.monthKey(today), mk = C.monthKey(firstDates.slice().sort()[0]), rows = [], guard = 0;
+    var payByAccMonth = {}, stPayByAccMonth = {};
+    planPayments(state).forEach(function (p) { var k = p.accountId + '|' + C.monthKey(p.date); payByAccMonth[k] = r2((payByAccMonth[k] || 0) + p.amount); });
+    state.movements.forEach(function (m) { if (m.kind === 'pago' && m.direction === 'abono' && m.source !== 'correo') { var k = m.accountId + '|' + C.monthKey(m.date); stPayByAccMonth[k] = r2((stPayByAccMonth[k] || 0) + m.amount); } });
+    while (mk <= curMk && guard++ < 120) {
+      var end = mk === curMk ? today : C.addDays(C.addMonths(mk, 1) + '-01', -1), total = 0, complete = true, approx = mk === curMk;
+      debts.forEach(function (d, i) {
+        if (d.status === 'liquidada' && d.paidOffDate && d.paidOffDate <= end) return;
+        if (firstDates[i] > end) { complete = false; return; }
+        var v = mk === curMk ? liveEstimate(state, d, today) : lastBalance(d, end);
+        if (!v) { complete = false; return; }
+        if (v.estimated) approx = true;
+        total += v.balance;
+      });
+      var accs = {}; Object.keys(payByAccMonth).concat(Object.keys(stPayByAccMonth)).forEach(function (k) { if (k.split('|')[1] === mk) accs[k.split('|')[0]] = true; });
+      var paid = C.sum(Object.keys(accs), function (a) { return Math.max(payByAccMonth[a + '|' + mk] || 0, stPayByAccMonth[a + '|' + mk] || 0); });
+      var newCharges = C.sum(state.movements.filter(function (m) { return cardAcc[m.accountId] && C.isSpending(m) && C.monthKey(m.date) === mk; }), function (m) { return m.amount; });
+      var interest = C.sum(state.movements.filter(function (m) { return cardAcc[m.accountId] && m.kind === 'cargo' && !m.excluded && C.monthKey(m.date) === mk; }), function (m) { return m.amount; });
+      state.debts.forEach(function (d) { (d.bankPayments || []).forEach(function (p) { if (C.monthKey(p.date) === mk) interest += +p.interest || 0; }); });
+      rows.push({ month: mk, total: complete ? r2(total) : null, approx: approx, current: mk === curMk, paid: r2(paid), newCharges: r2(newCharges), interest: r2(interest) });
+      mk = C.addMonths(mk, 1);
+    }
+    var prev = null;
+    rows.forEach(function (r) { r.change = r.total !== null && prev !== null ? r2(r.total - prev) : null; if (r.total !== null) prev = r.total; });
+    rows = rows.filter(function (r) { return r.total !== null; });
+    var streak = 0; for (var i = rows.length - 1; i >= 0; i--) { if (rows[i].change !== null && rows[i].change < -0.5) streak++; else if (rows[i].change !== null) break; }
+    return { rows: rows, streak: streak };
+  }
+
   // ---------- Datos de demostración (ficticios) ----------
   function demoState() {
     var s = emptyState('demo');
@@ -2369,7 +2456,7 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
     accountKey: accountKey, shortInst: shortInst, movementHash: movementHash, findDuplicates: findDuplicates, statementDuplicate: statementDuplicate,
     debtProposals: debtProposals, applyImport: applyImport, deleteStatement: deleteStatement, addVictory: addVictory, totalDebt: totalDebt, checkMilestones: checkMilestones,
     HOUSEHOLD_TEMPLATE: HOUSEHOLD_TEMPLATE, EXTRA_SOURCES: EXTRA_SOURCES, monthRec: monthRec, effectiveBudget: effectiveBudget, baseBudget: baseBudget, monthSummary: monthSummary, avgRealIncome: avgRealIncome, avgRealBill: avgRealBill,
-    planStart: planStart, activeDebts: activeDebts, closeMonth: closeMonth, streak: streak, demoState: demoState, scheduleCostRate: scheduleCostRate
+    planStart: planStart, activeDebts: activeDebts, closeMonth: closeMonth, streak: streak, debtTrend: debtTrend, lastBalance: lastBalance, demoState: demoState, scheduleCostRate: scheduleCostRate
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = FX;
 })(typeof globalThis !== 'undefined' ? globalThis : this);
@@ -2906,6 +2993,7 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
       (c.baseline && c.baseline.debtFreeMonth && c.mode !== 'minimos' ? 'Pagando solo mínimos sería ' + C.fmtMonth(c.baseline.debtFreeMonth, true) + ' y ≈' + money(c.baseline.totalCost) + '.' : '');
     var html = '<div class="card hero"><div class="tiny" style="opacity:.8;text-transform:uppercase;letter-spacing:.6px">Esto es lo que debes hacer ahora para acercarte a tu libertad financiera</div><h1 class="mt" style="font-size:1.25rem">' + (acts.length ? 'Tus 3 acciones más importantes' : 'Todo en orden') + '</h1><ol>' +
       acts.map(function (a) { return '<li>' + a.t + (a.go ? ' <a href="#/' + a.go + '" style="color:#9fe3c6">Ir →</a>' : '') + '</li>'; }).join('') + '</ol><p class="mini mt">' + summary + '</p></div>';
+    html += '<div class="mt">' + App.trendCard(true) + '</div>';
     // Información pendiente
     var missing = [];
     b.missing.forEach(function (m) { missing.push('Falta registrar ' + m + ' en <a href="#/mes">Mes a mes</a>.'); });
@@ -3907,7 +3995,7 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
     var interestPaid = 0;
     st.statements.forEach(function (s) { var f = s.fields || {}; interestPaid += (f.interestMonth ? f.interestMonth.v : 0) + (f.interestDeferred ? f.interestDeferred.v : 0) + (f.lateInterest ? f.lateInterest.v : 0); });
     var sk = S.streak(st);
-    var html = '<div class="grid g4">' +
+    var html = App.trendCard() + '<div class="grid g4 mt">' +
       App.kpi('Progreso hacia cero deudas', prog === null ? '—' : C.fmtPct(prog, 1), prog === null ? 'Se mide desde tu primer plan aprobado' : App.bar(prog)) +
       App.kpi('Capital amortizado', amortized === null ? '—' : money(amortized), base ? 'desde ' + C.fmtDate(base.date) + ' (' + money(base.totalDebt) + ')' : '') +
       App.kpi('Intereses pagados (documentos)', money(r2(interestPaid)), 'restantes estimados: ' + money(c.sim.totalCost) + ' ' + App.src('proyeccion')) +
@@ -3929,6 +4017,37 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
     var ks = st.closedMonths.slice().sort().reverse();
     if (ks.length) html += '<div class="card mt"><h3>Meses cerrados</h3><table><thead><tr><th>Mes</th><th class="n">Previsto</th><th class="n">Pagado</th><th>Resultado</th></tr></thead><tbody>' + ks.map(function (k) { var cl = st.plans[k] && st.plans[k].closed; return cl ? '<tr><td>' + C.fmtMonth(k, true) + '</td><td class="n">' + money(cl.planned) + '</td><td class="n">' + money(cl.paid) + '</td><td>' + (cl.met ? '<span class="badge b-ok">cumplido</span>' : '<span class="badge b-warn">parcial</span>') + '</td></tr>' : ''; }).join('') + '</tbody></table></div>';
     return html;
+  };
+
+  // Comparativo mes a mes: ¿la deuda total bajó o subió, y por qué?
+  App.trendCard = function (compact) {
+    var t = S.debtTrend(App.state), rows = t.rows;
+    var html = '<div class="card trend"><h2>Mis deudas mes a mes</h2>';
+    if (!rows.length) return html + '<p class="small muted">Todavía no hay saldos suficientes. Importa los estados de cuenta de todas tus tarjetas y préstamos: desde ese mes la app compara cada mes con el anterior.</p></div>';
+    var last = rows[rows.length - 1], ref = last.change !== null ? last : null;
+    var head;
+    if (!ref) head = '<p class="trendHead">Deuda total: <b>' + money(last.total) + '</b>' + (last.current ? ' (estimado a hoy)' : '') + '. El mes que viene ya podrás ver si avanzas o retrocedes.</p>';
+    else if (ref.change < -0.5) head = '<p class="trendHead good">▼ ' + (ref.current ? 'Este mes vas avanzando' : 'En ' + C.fmtMonth(ref.month) + ' avanzaste') + ' <b>' + money(-ref.change) + '</b>: tu deuda total ' + (ref.current ? 'va en' : 'quedó en') + ' <b>' + money(ref.total) + '</b>.' + (t.streak > 1 ? ' Llevas <b>' + t.streak + ' meses seguidos</b> bajando. 💪' : '') + '</p>';
+    else if (ref.change > 0.5) head = '<p class="trendHead bad">▲ ' + (ref.current ? 'Este mes vas retrocediendo' : 'En ' + C.fmtMonth(ref.month) + ' retrocediste') + ' <b>' + money(ref.change) + '</b>: tu deuda total ' + (ref.current ? 'va en' : 'quedó en') + ' <b>' + money(ref.total) + '</b>. ' + esc(why(ref)) + '</p>';
+    else head = '<p class="trendHead">= Tu deuda se mantiene en <b>' + money(ref.total) + '</b>.</p>';
+    html += head;
+    if (compact) return html + '<a class="small" href="#/progreso">Ver el detalle mes a mes</a></div>';
+    var maxCh = Math.max.apply(null, rows.map(function (r) { return Math.abs(r.change || 0); }).concat([1]));
+    html += '<div class="tblWrap"><table class="trendTbl"><thead><tr><th>Mes</th><th class="n">Deuda al cierre</th><th>Cambio</th><th class="n">Pagaste</th><th class="n">Consumos nuevos</th><th class="n">Intereses y cargos</th></tr></thead><tbody>' +
+      rows.slice().reverse().map(function (r) {
+        var ch = r.change, cls = ch === null ? '' : ch < -0.5 ? 'good' : ch > 0.5 ? 'bad' : '';
+        var lbl = ch === null ? '<span class="tiny muted">primer mes con datos</span>' : '<span class="chg ' + cls + '">' + (ch < -0.5 ? '▼ ' + money(-ch) + ' avanzaste' : ch > 0.5 ? '▲ ' + money(ch) + ' retrocediste' : '= sin cambio') + '</span><span class="chgBar ' + cls + '"><i style="width:' + (Math.abs(ch) / maxCh * 100).toFixed(0) + '%"></i></span>';
+        return '<tr><td class="nowrap"><b>' + C.fmtMonth(r.month) + '</b>' + (r.current ? '<br><span class="tiny muted">en curso · estimado</span>' : r.approx ? '<br><span class="tiny muted">con saldos estimados</span>' : '') + '</td><td class="n"><b>' + money(r.total) + '</b></td><td>' + lbl + '</td>' +
+          '<td class="n amtNeg">' + (r.paid ? '−' + money(r.paid) : '—') + '</td><td class="n">' + (r.newCharges ? '+' + money(r.newCharges) : '—') + '</td><td class="n">' + (r.interest ? '+' + money(r.interest) : '—') + '</td></tr>';
+      }).join('') + '</tbody></table></div>' +
+      '<p class="tiny muted mt">Cómo leerlo: la deuda baja cuando lo que pagas supera los consumos nuevos con tarjeta y los intereses que cobra el banco. Los saldos de cada mes salen de los estados de cuenta; el mes en curso se estima con los avisos del correo hasta que llegue el próximo corte. Las cuotas de compras diferidas no son consumos nuevos: ya estaban en la deuda.</p></div>';
+    return html;
+    function why(r) {
+      var add = r2(r.newCharges + r.interest);
+      if (r.paid && add > r.paid) return 'Los consumos nuevos (' + money(r.newCharges) + ') y los intereses (' + money(r.interest) + ') superaron lo que pagaste (' + money(r.paid) + ').';
+      if (!r.paid) return 'Todavía no hay pagos registrados este mes.';
+      return 'Revisa los consumos nuevos con tarjeta.';
+    }
   };
 
   // =============== CONFIGURACIÓN ===============
@@ -5033,7 +5152,7 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
         if (!la) return pend('Pago del préstamo ' + (ev.product || '') + ' (doc. …' + (ev.loan || '') + ') por ' + money(ev.amount) + ': elige el préstamo.', { action: 'prestamo' });
         var rl = registerPayment(st, la.id, ev.amount, ev.date, fp, person);
         var debt = st.debts.find(function (x) { return x.accountId === la.id && E.isActive(x); });
-        if (debt && !rl.dup) { debt.lastPayment = { date: ev.date, total: ev.amount, capital: ev.capital, interest: ev.interest, source: 'correo' }; }
+        if (debt && !rl.dup) { debt.lastPayment = { date: ev.date, total: ev.amount, capital: ev.capital, interest: ev.interest, source: 'correo' }; debt.bankPayments = (debt.bankPayments || []).concat([{ date: ev.date, total: ev.amount, capital: ev.capital || 0, interest: ev.interest || 0, fp: fp }]); }
         return ok(rl.dup ? 'Pago del préstamo ya registrado' : 'Cuota del ' + (la.alias || 'préstamo') + ' pagada: ' + money(ev.amount) + (ev.capital ? ' (capital ' + money(ev.capital) + ', interés ' + money(ev.interest) + ')' : '') + ' → Plan de ' + C.fmtMonth(rl.mk));
       }
       case 'bill': {
