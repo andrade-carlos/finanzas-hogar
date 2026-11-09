@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-jnTVrhdXeH0WtQcodhJ6tUkrXVF3ZuruEgoekzBAKy8=' 'sha256-tKJf9AqoVeciyRhEol3T8vwgBvq3Zx7LLWBOXwU9Ku8=' 'sha256-LQliFBaphYmmoUwuD3Bk4FNOt92m1Z43QrUdLPSEHns=' 'sha256-mi77sEKFNvL85Pk/3r8oTcwqca9u/rYmKkBe3F2Ad/U=' 'sha256-ROWBrShN6uWnlI4BHmEAq7WJY/EF1YLr9V4I3w/Qi9s=' 'sha256-5dNx8jm/+YgajgSduK9c8a7JZe5UMk1eZns/d0YgV6c='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'self' https://*.supabase.co; worker-src blob:; form-action 'none'; base-uri 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-jnTVrhdXeH0WtQcodhJ6tUkrXVF3ZuruEgoekzBAKy8=' 'sha256-tKJf9AqoVeciyRhEol3T8vwgBvq3Zx7LLWBOXwU9Ku8=' 'sha256-LQliFBaphYmmoUwuD3Bk4FNOt92m1Z43QrUdLPSEHns=' 'sha256-mi77sEKFNvL85Pk/3r8oTcwqca9u/rYmKkBe3F2Ad/U=' 'sha256-nINRiPPAd+l8I/yawpcpNwLnLi13rYRsIVtpQqZmp4w=' 'sha256-5dNx8jm/+YgajgSduK9c8a7JZe5UMk1eZns/d0YgV6c='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'self' https://*.supabase.co; worker-src blob:; form-action 'none'; base-uri 'none'; object-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex, nofollow, noarchive">
 <title>Libertad Financiera</title>
@@ -2580,8 +2580,14 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
     App.state.updatedAt = new Date().toISOString();
     try {
       var r = await S.save('state:' + App.profile, App.state);
-      App._dirty = false; App._lastSave = new Date(); App._saveErr = null; App._storage = (r && r.label) || (r && r.idb ? 'IndexedDB' : 'localStorage');
-    } catch (e) { App._saveErr = e.message; App.toast('No se pudo guardar: ' + e.message + '. Exporta un respaldo ahora.', 'bad'); }
+      App._dirty = false; App._lastSave = new Date(); App._saveErr = null; App._netWarned = false; App._storage = (r && r.label) || (r && r.idb ? 'IndexedDB' : 'localStorage');
+    } catch (e) {
+      App._saveErr = e.message;
+      var net = /conexi[oó]n|fetch|network|internet/i.test(e.message);
+      if (net) { clearTimeout(App._retryTimer); App._retryTimer = setTimeout(App.flush, 15000); }
+      if (!net || !App._netWarned) App.toast('No se pudo guardar: ' + e.message + (net ? ' Se reintentará solo en unos segundos; no cierres la página.' : ' Exporta un respaldo ahora.'), 'bad');
+      if (net) App._netWarned = true;
+    }
     App.renderSaveStatus();
   };
   App.mutate = function (fn, opts) { fn(App.state); App.touch(); if (!(opts && opts.noRender)) App.render(); };
@@ -4251,8 +4257,16 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
     return msg;
   }
   Cloud.friendly = friendly;
+  // Reintenta cuando la red falla un momento (Wi-Fi, VPN, el servidor gratuito despertando).
+  var NET = /Failed to fetch|NetworkError|Load failed|network|fetch failed|timeout|ECONN/i;
   async function rpc(fn, args) {
-    var r = await Cloud.sb.rpc(fn, args || {});
+    var r, wait = [1500, 4000, 9000];
+    for (var i = 0; ; i++) {
+      try { r = await Cloud.sb.rpc(fn, args || {}); } catch (x) { r = { error: { message: String(x && x.message || x) } }; }
+      if (!r.error || !NET.test(r.error.message || '') || i >= wait.length) break;
+      Cloud.netRetries = (Cloud.netRetries || 0) + 1;
+      await sleep(wait[i]);
+    }
     if (r.error) { var e = new Error(friendly(r.error.message)); e.raw = r.error.message; if (/not_authenticated|JWT expired|mfa_required/.test(r.error.message)) e.auth = true; throw e; }
     return r.data;
   }
@@ -5099,8 +5113,8 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
     var stats = { ok: 0, pending: 0, ignored: 0, stmt: 0 };
     try {
       var after = 0, rounds = 0;
-      while (rounds++ < 20) {
-        var items = await Cloud.rpc('inbox_list', { p_after: after, p_limit: 40 });
+      while (rounds++ < 60) {
+        var items = await Cloud.rpc('inbox_list', { p_after: after, p_limit: 10 });
         if (!items || !items.length) break;
         after = items[items.length - 1].id;
         var ack = [], sk = M(App.state).sk;
@@ -5128,7 +5142,7 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
         await App.flush(); await Cloud.chain;
         if (App._saveErr || App._dirty) throw new Error('No se pudo guardar; se reintentará.');
         if (ack.length) await Cloud.rpc('inbox_ack', { p_ids: ack });
-        if (items.length < 40) break;
+        if (items.length < 10) break;
       }
       Mail.lastSync = Date.now();
       if (stats.ok + stats.pending + stats.stmt) Cloud.rpc('log_event', { p_action: 'procesar_correo' }).catch(function () { });
