@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-jnTVrhdXeH0WtQcodhJ6tUkrXVF3ZuruEgoekzBAKy8=' 'sha256-tKJf9AqoVeciyRhEol3T8vwgBvq3Zx7LLWBOXwU9Ku8=' 'sha256-LQliFBaphYmmoUwuD3Bk4FNOt92m1Z43QrUdLPSEHns=' 'sha256-mi77sEKFNvL85Pk/3r8oTcwqca9u/rYmKkBe3F2Ad/U=' 'sha256-B0DVu0fvwoUzDRUOZBXFxwF0+sD7PemWnrqIiNELrlo=' 'sha256-5dNx8jm/+YgajgSduK9c8a7JZe5UMk1eZns/d0YgV6c='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'self' https://*.supabase.co; worker-src blob:; form-action 'none'; base-uri 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-jnTVrhdXeH0WtQcodhJ6tUkrXVF3ZuruEgoekzBAKy8=' 'sha256-tKJf9AqoVeciyRhEol3T8vwgBvq3Zx7LLWBOXwU9Ku8=' 'sha256-LQliFBaphYmmoUwuD3Bk4FNOt92m1Z43QrUdLPSEHns=' 'sha256-mi77sEKFNvL85Pk/3r8oTcwqca9u/rYmKkBe3F2Ad/U=' 'sha256-ROWBrShN6uWnlI4BHmEAq7WJY/EF1YLr9V4I3w/Qi9s=' 'sha256-5dNx8jm/+YgajgSduK9c8a7JZe5UMk1eZns/d0YgV6c='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'self' https://*.supabase.co; worker-src blob:; form-action 'none'; base-uri 'none'; object-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex, nofollow, noarchive">
 <title>Libertad Financiera</title>
@@ -2694,7 +2694,7 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
     App.closeModal();
     var bg = document.createElement('div'); bg.className = 'modalBg'; bg.id = 'modalBg';
     bg.innerHTML = '<div class="modal ' + (opts && opts.wide ? 'wide' : '') + '">' + html + '</div>';
-    bg.addEventListener('click', function (e) { if (e.target === bg) App.closeModal(); });
+    if (!(opts && opts.locked)) bg.addEventListener('click', function (e) { if (e.target === bg) App.closeModal(); });
     document.body.appendChild(bg);
     var f = bg.querySelector('input,select,textarea'); if (f) f.focus();
   };
@@ -4537,8 +4537,19 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
   var conflictOpen = false;
   function conflict() {
     if (conflictOpen) return; conflictOpen = true;
-    App.modal('<h2>Hay cambios más recientes</h2><p>Mientras trabajabas, otra persona del hogar guardó cambios. Para no borrar su trabajo, se cargará la versión más reciente.</p><p class="small"><b>Tu último cambio no se guardó:</b> revisa la pantalla y vuelve a hacerlo si hace falta.</p><div class="acts"><button class="primary" data-act="cloudReload">Cargar la versión más reciente</button></div>');
+    App.modal('<h2>Hay cambios más recientes</h2><p>Mientras trabajabas, se guardaron cambios desde otra sesión (otro dispositivo, otra pestaña o el otro miembro del hogar). <b>Tus últimos cambios todavía no están guardados.</b></p>' +
+      '<p class="small">Elige qué conservar:</p><ul class="small"><li><b>Guardar mis cambios:</b> lo que ves en tu pantalla reemplaza lo que guardó la otra sesión.</li><li><b>Cargar la versión más reciente:</b> se descartan tus cambios sin guardar.</li></ul>' +
+      '<div class="acts"><button data-act="cloudReload">Cargar la versión más reciente</button><button class="primary" data-act="cloudKeepMine">Guardar mis cambios</button></div>', { locked: true });
     App.actions.cloudReload = async function () { App.closeModal(); conflictOpen = false; try { await reloadFromCloud('Se cargó la versión más reciente.'); } catch (e) { App.toast(friendly(e.message), 'bad'); } };
+    App.actions.cloudKeepMine = async function () {
+      App.closeModal(); conflictOpen = false;
+      try {
+        var v = await rpc('get_state_version');
+        Cloud.version = v.version; Cloud.lastSavedJson = null; App._saveErr = null; App._dirty = true;
+        await App.flush(); await Cloud.chain;
+        if (!App._saveErr) App.toast('Tus cambios quedaron guardados.', 'ok');
+      } catch (e) { App.toast(friendly(e.message), 'bad'); }
+    };
   }
 
   // ------------------------------------------------------------------ vigilancia: cambios remotos e inactividad
